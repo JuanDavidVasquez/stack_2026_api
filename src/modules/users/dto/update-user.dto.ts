@@ -18,6 +18,7 @@ export const updateUserSchema = createUserSchema.partial().extend({
     .optional(),
 
   isActive: z.boolean().optional(),
+  avatar: z.string().url('validation.isUrl').optional(),
 });
 
 export type UpdateUserDto = z.infer<typeof updateUserSchema>;

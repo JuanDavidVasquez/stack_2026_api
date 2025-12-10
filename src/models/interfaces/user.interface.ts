@@ -1,65 +1,72 @@
-import { UserRole } from "../enums";
-import { UserStatus } from "../enums/user-status.enum";
+import { UserRole, UserStatus } from "../enums";
 
 
-
-/**
- * Interface para el objeto User
- * 
- * Define la estructura de datos de un usuario
- */
 export interface IUser {
   id: string;
+  username: string;
   email: string;
-  name: string;
   password: string;
+  firstName: string | null;
+  lastName: string | null;
   role: UserRole;
   status: UserStatus;
-  isEmailVerified: boolean;
-  lastLoginAt?: Date;
+  phone: string | null;
+  avatar: string | null;
+  emailVerified: boolean;
+  emailVerifiedAt: Date | null;
+  lastLoginAt: Date | null;
+  lastLoginIp: string | null;
+  loginAttempts: number;
+  lockedUntil: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date;
+  deletedAt: Date | null;
 }
 
-/**
- * Interface para crear un nuevo usuario
- * Omite campos autogenerados
- */
 export interface ICreateUser {
   email: string;
-  name: string;
   password: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
   role?: UserRole;
   status?: UserStatus;
+  phone?: string;
 }
 
-/**
- * Interface para actualizar un usuario
- * Todos los campos son opcionales excepto el id
- */
 export interface IUpdateUser {
   id: string;
   email?: string;
-  name?: string;
   password?: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
   role?: UserRole;
   status?: UserStatus;
-  isEmailVerified?: boolean;
+  phone?: string;
+  avatar?: string;
 }
 
-/**
- * Interface para respuesta de usuario
- * Datos públicos del usuario
- */
 export interface IUserResponse {
   id: string;
+  username: string;
   email: string;
-  name: string;
+  firstName: string | null;
+  lastName: string | null;
+  fullName: string;
   role: UserRole;
   status: UserStatus;
-  isEmailVerified: boolean;
-  lastLoginAt?: Date;
+  phone: string | null;
+  avatar: string | null;
+  emailVerified: boolean;
+  emailVerifiedAt: Date | null;
+  lastLoginAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IUserProfile extends IUserResponse {
+  lastLoginIp: string | null;
+  loginAttempts: number;
+  isLocked: boolean;
 }

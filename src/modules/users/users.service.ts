@@ -1,83 +1,96 @@
-// src/modules/users/users.service.ts
-
 import {
   Injectable,
   NotFoundException,
   ConflictException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryUserDto } from './dto/query-user.dto';
-import * as bcrypt from 'bcrypt';
+import { CryptoService } from 'src/common/services/crypto.service';
 import { User } from 'src/models';
+import { UserRole, UserStatus } from 'src/models/enums';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private readonly cryptoService: CryptoService,
   ) {}
 
-  /**
-   * Crear un nuevo usuario
-   */
   async create(createUserDto: CreateUserDto): Promise<User> {
-    console.log('Creating user with data:', createUserDto);
-    // Verificar si el email ya existe
+    this.logger.log(`Creating user with email: ${createUserDto.email}`);
+
     const existingUser = await this.usersRepository.findOne({
-      where: { email: createUserDto.email },
+      where: { email: createUserDto.email.toLowerCase() },
     });
 
     if (existingUser) {
-      // Lanzar excepción con clave de traducción
       throw new ConflictException('user.emailExists');
     }
 
-    // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await this.cryptoService.hashPassword(createUserDto.password);
 
     const user = this.usersRepository.create({
-      ...createUserDto,
+      email: createUserDto.email,
       password: hashedPassword,
-      role: createUserDto.role as any, // Cast to match the entity type
+      firstName: createUserDto.firstName,
+      lastName: createUserDto.lastName,
+      username: createUserDto.username,
+      phone: createUserDto.phone,
+      role: createUserDto.role as UserRole,
+      status: UserStatus.PENDING,
     });
 
-    return await this.usersRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
+    this.logger.log(`User created successfully: ${savedUser.id}`);
+
+    return savedUser;
   }
 
-  /**
-   * Obtener todos los usuarios con paginación y filtros
-   */
   async findAll(queryDto: QueryUserDto) {
     const { page, limit, sortBy, sortOrder, search, role, isActive } = queryDto;
 
     const queryBuilder = this.usersRepository.createQueryBuilder('user');
 
-    // Filtro por búsqueda
     if (search) {
       queryBuilder.andWhere(
-        '(user.email LIKE :search OR user.firstName LIKE :search OR user.lastName LIKE :search)',
+        '(LOWER("user"."email") LIKE LOWER(:search) OR LOWER("user"."first_name") LIKE LOWER(:search) OR LOWER("user"."last_name") LIKE LOWER(:search) OR LOWER("user"."username") LIKE LOWER(:search))',
         { search: `%${search}%` },
       );
     }
 
-    // Filtro por rol
     if (role) {
-      queryBuilder.andWhere('user.role = :role', { role });
+      queryBuilder.andWhere('"user"."role" = :role', { role });
     }
 
-    // Filtro por estado activo
     if (isActive !== undefined) {
-      queryBuilder.andWhere('user.isActive = :isActive', { isActive });
+      queryBuilder.andWhere('"user"."is_active" = :isActive', { isActive });
     }
 
-    // Ordenamiento
-    queryBuilder.orderBy(`user.${sortBy}`, sortOrder);
+    // Mapeo de campos camelCase a snake_case
+    const sortByMap: Record<string, string> = {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      firstName: 'first_name',
+      lastName: 'last_name',
+      emailVerified: 'email_verified',
+      emailVerifiedAt: 'email_verified_at',
+      lastLoginAt: 'last_login_at',
+      lastLoginIp: 'last_login_ip',
+      loginAttempts: 'login_attempts',
+      lockedUntil: 'locked_until',
+    };
 
-    // Paginación
+    const columnName = sortByMap[sortBy] || sortBy;
+    queryBuilder.orderBy(`"user"."${columnName}"`, sortOrder);
+
     const skip = (page - 1) * limit;
     queryBuilder.skip(skip).take(limit);
 
@@ -90,38 +103,39 @@ export class UsersService {
         limit,
         total,
         totalPages: Math.ceil(total / limit),
+        hasNextPage: page * limit < total,
+        hasPreviousPage: page > 1,
       },
     };
   }
 
-  /**
-   * Obtener un usuario por ID
-   */
   async findOne(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({ where: { id } });
 
     if (!user) {
-      // Lanzar excepción con clave de traducción
       throw new NotFoundException('user.notFound');
     }
 
     return user;
   }
 
-  /**
-   * Obtener un usuario por email
-   */
   async findByEmail(email: string): Promise<User | null> {
-    return await this.usersRepository.findOne({ where: { email } });
+    return await this.usersRepository.findOne({ 
+      where: { email: email.toLowerCase() },
+      select: ['id', 'email', 'password', 'role', 'status', 'loginAttempts', 'lockedUntil', 'firstName', 'lastName', 'username'],
+    });
   }
 
-  /**
-   * Actualizar un usuario
-   */
+  async findByUsername(username: string): Promise<User | null> {
+    return await this.usersRepository.findOne({ 
+      where: { username: username.toLowerCase() },
+      select: ['id', 'email', 'password', 'role', 'status', 'loginAttempts', 'lockedUntil', 'firstName', 'lastName', 'username'],
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 
-    // Si se actualiza el email, verificar que no exista
     if (updateUserDto.email && updateUserDto.email !== user.email) {
       const existingUser = await this.findByEmail(updateUserDto.email);
       if (existingUser) {
@@ -129,26 +143,30 @@ export class UsersService {
       }
     }
 
-    // Si se actualiza la contraseña, hashearla
     if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+      user.password = await this.cryptoService.hashPassword(updateUserDto.password);
     }
 
-    Object.assign(user, updateUserDto);
-    return await this.usersRepository.save(user);
+    if (updateUserDto.email) user.email = updateUserDto.email;
+    if (updateUserDto.firstName !== undefined) user.firstName = updateUserDto.firstName;
+    if (updateUserDto.lastName !== undefined) user.lastName = updateUserDto.lastName;
+    if (updateUserDto.username) user.username = updateUserDto.username;
+    if (updateUserDto.phone !== undefined) user.phone = updateUserDto.phone;
+    if (updateUserDto.role) user.role = updateUserDto.role as UserRole;
+    if (updateUserDto.avatar !== undefined) user.avatar = updateUserDto.avatar;
+
+    const updatedUser = await this.usersRepository.save(user);
+    
+    this.logger.log(`User updated successfully: ${updatedUser.id}`);
+    return updatedUser;
   }
 
-  /**
-   * Eliminar un usuario (soft delete)
-   */
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     await this.usersRepository.softRemove(user);
+    this.logger.log(`User soft deleted: ${id}`);
   }
 
-  /**
-   * Restaurar un usuario eliminado
-   */
   async restore(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { id },
@@ -160,20 +178,52 @@ export class UsersService {
     }
 
     await this.usersRepository.restore(id);
+    this.logger.log(`User restored: ${id}`);
     return await this.findOne(id);
   }
 
-  /**
-   * Verificar contraseña
-   */
   async validatePassword(user: User, password: string): Promise<boolean> {
-    return await bcrypt.compare(password, user.password);
+    return await this.cryptoService.verifyPassword(password, user.password);
   }
 
-  /**
-   * Actualizar último login
-   */
-  async updateLastLogin(id: string): Promise<void> {
-    await this.usersRepository.update(id, { lastLogin: new Date() });
+  async updateLastLogin(id: string, ip?: string): Promise<void> {
+    const user = await this.findOne(id);
+    user.updateLastLogin(ip);
+    await this.usersRepository.save(user);
+    this.logger.log(`Last login updated for user: ${id}`);
+  }
+
+  async incrementLoginAttempts(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    user.incrementLoginAttempts();
+
+    if (user.loginAttempts >= 5) {
+      user.lockAccount(30);
+      this.logger.warn(`User account locked due to failed attempts: ${id}`);
+    }
+
+    await this.usersRepository.save(user);
+  }
+
+  async unlockAccount(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    user.unlockAccount();
+    await this.usersRepository.save(user);
+    this.logger.log(`User account unlocked: ${id}`);
+  }
+
+  async verifyEmail(id: string): Promise<void> {
+    const user = await this.findOne(id);
+    user.verifyEmail();
+    await this.usersRepository.save(user);
+    this.logger.log(`Email verified for user: ${id}`);
+  }
+
+  async changeStatus(id: string, status: UserStatus): Promise<User> {
+    const user = await this.findOne(id);
+    user.status = status;
+    const updatedUser = await this.usersRepository.save(user);
+    this.logger.log(`User status changed to ${status}: ${id}`);
+    return updatedUser;
   }
 }

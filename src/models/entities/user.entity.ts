@@ -1,16 +1,11 @@
-import { Entity, Column, Index, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, Column, Index, OneToMany, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { BaseEntity } from './base.entity';
-import { UserStatus } from '../enums/user-status.enum';
-import { UserRole } from '../enums';
+import { RefreshToken } from './refresh-token.entity';
+import { UserRole, UserStatus } from '../enums';
 
-/**
- * Entidad User
- * Representa un usuario en el sistema
- */
 @Entity('users')
 @Index(['email'], { unique: true })
 export class User extends BaseEntity {
-
   @Column({
     type: 'varchar',
     length: 50,
@@ -21,21 +16,7 @@ export class User extends BaseEntity {
 
   @Column({
     type: 'varchar',
-    length: 100,
-    nullable: false,
-  })
-  firstName: string;
-
-  @Column({
-    type: 'varchar',
-    length: 100,
-    nullable: false,
-  })
-  lastName: string;
-
-  @Column({
-    type: 'varchar',
-    length: 100,
+    length: 255,
     unique: true,
     nullable: false,
   })
@@ -50,10 +31,27 @@ export class User extends BaseEntity {
   password: string;
 
   @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+    name: 'first_name',
+  })
+  firstName: string | null;
+
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+    name: 'last_name',
+  })
+  lastName: string | null;
+
+  @Column({
     type: 'enum',
     enum: UserRole,
     default: UserRole.USER,
   })
+  @Index()
   role: UserRole;
 
   @Column({
@@ -61,7 +59,22 @@ export class User extends BaseEntity {
     enum: UserStatus,
     default: UserStatus.PENDING,
   })
+  @Index()
   status: UserStatus;
+
+  @Column({
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+  })
+  phone: string | null;
+
+  @Column({
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+  })
+  avatar: string | null;
 
   @Column({
     type: 'boolean',
@@ -73,59 +86,55 @@ export class User extends BaseEntity {
   @Column({
     type: 'timestamp',
     nullable: true,
-    name: 'last_login',
+    name: 'email_verified_at',
   })
-  lastLogin?: Date;
+  emailVerifiedAt: Date | null;
+
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+    name: 'last_login_at',
+  })
+  lastLoginAt: Date | null;
 
   @Column({
     type: 'varchar',
-    length: 50,
+    length: 45,
     nullable: true,
+    name: 'last_login_ip',
   })
-  lastLoginIp?: string;
+  lastLoginIp: string | null;
 
   @Column({
-    type: 'varchar',
-    length: 100,
-    nullable: true,
-    name: 'avatar',
+    type: 'int',
+    default: 0,
+    name: 'login_attempts',
   })
-  avatar?: string;
+  loginAttempts: number;
 
   @Column({
-    type: 'boolean',
-    default: true,
-    name: 'is_active',
+    type: 'timestamp',
+    nullable: true,
+    name: 'locked_until',
   })
-  isActive: boolean;
+  lockedUntil: Date | null;
 
-  /**
-   * 🔧 NUEVO: Genera username automáticamente si no existe
-   * Este hook se ejecuta ANTES de insertar en la base de datos
-   */
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens: RefreshToken[];
+
   @BeforeInsert()
   generateUsername() {
     if (!this.username && this.email) {
-      // Extraer parte antes del @ del email
       const emailPrefix = this.email.split('@')[0];
-      
-      // Limpiar y formatear: lowercase, solo alfanuméricos
       const cleanPrefix = emailPrefix
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '')
-        .substring(0, 20); // Limitar a 20 caracteres
-      
-      // Agregar timestamp para unicidad
-      const timestamp = Date.now().toString().slice(-6); // Últimos 6 dígitos
+        .substring(0, 20);
+      const timestamp = Date.now().toString().slice(-6);
       this.username = `${cleanPrefix}${timestamp}`;
-      
-      console.log(`🔧 Username auto-generado: ${this.username} (email: ${this.email})`);
     }
   }
 
-  /**
-   * Normaliza el email antes de insertar/actualizar
-   */
   @BeforeInsert()
   @BeforeUpdate()
   normalizeEmail() {
@@ -134,14 +143,66 @@ export class User extends BaseEntity {
     }
   }
 
-  /**
-   * Normaliza el username antes de insertar/actualizar
-   */
   @BeforeInsert()
   @BeforeUpdate()
   normalizeUsername() {
     if (this.username) {
       this.username = this.username.toLowerCase().trim();
+    }
+  }
+
+  get fullName(): string {
+    if (this.firstName && this.lastName) {
+      return `${this.firstName} ${this.lastName}`;
+    }
+    return this.firstName || this.lastName || this.email;
+  }
+
+  isActive(): boolean {
+    return this.status === UserStatus.ACTIVE && !this.isLocked();
+  }
+
+  isLocked(): boolean {
+    if (!this.lockedUntil) return false;
+    return this.lockedUntil > new Date();
+  }
+
+  hasRole(role: UserRole): boolean {
+    return this.role === role;
+  }
+
+  isAdmin(): boolean {
+    return this.role === UserRole.ADMIN;
+  }
+
+  lockAccount(minutes: number = 30): void {
+    this.lockedUntil = new Date(Date.now() + minutes * 60 * 1000);
+  }
+
+  unlockAccount(): void {
+    this.lockedUntil = null;
+    this.loginAttempts = 0;
+  }
+
+  incrementLoginAttempts(): void {
+    this.loginAttempts += 1;
+  }
+
+  resetLoginAttempts(): void {
+    this.loginAttempts = 0;
+  }
+
+  updateLastLogin(ip?: string): void {
+    this.lastLoginAt = new Date();
+    this.lastLoginIp = ip || null;
+    this.resetLoginAttempts();
+  }
+
+  verifyEmail(): void {
+    this.emailVerified = true;
+    this.emailVerifiedAt = new Date();
+    if (this.status === UserStatus.PENDING) {
+      this.status = UserStatus.ACTIVE;
     }
   }
 }

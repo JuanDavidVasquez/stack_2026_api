@@ -22,30 +22,23 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { LanguageInterceptor } from '../../common/interceptors/language.interceptor';
 import { TranslationService } from '../../common/services/translation.service';
 import { Lang } from '../../common/decorators/i18n.decorator';
+import { UserStatus } from 'src/models/enums';
 
 @Controller('users')
-@UseInterceptors(LanguageInterceptor) // Agrega el idioma a todas las respuestas
+@UseInterceptors(LanguageInterceptor)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly translation: TranslationService,
   ) {}
 
-  /**
-   * Crear un nuevo usuario
-   * POST /users
-   */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body(new ZodValidationPipe(createUserSchema)) createUserDto: CreateUserDto,
     @Lang() lang: string,
   ) {
-    console.log('**********************************************')
-    console.log('Received create user request with data:', createUserDto);
     const user = await this.usersService.create(createUserDto);
-
-    // No retornar la contraseña
     const { password, ...userWithoutPassword } = user;
 
     return {
@@ -54,10 +47,6 @@ export class UsersController {
     };
   }
 
-  /**
-   * Obtener todos los usuarios con paginación
-   * GET /users?page=1&limit=10&search=john&role=admin
-   */
   @Get()
   async findAll(
     @Query(new ZodValidationPipe(queryUserSchema)) queryDto: QueryUserDto,
@@ -65,7 +54,6 @@ export class UsersController {
   ) {
     const result = await this.usersService.findAll(queryDto);
 
-    // Remover contraseñas de todos los usuarios
     const usersWithoutPasswords = result.data.map(user => {
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
@@ -78,10 +66,6 @@ export class UsersController {
     };
   }
 
-  /**
-   * Obtener un usuario por ID
-   * GET /users/:id
-   */
   @Get(':id')
   async findOne(@Param('id') id: string, @Lang() lang: string) {
     const user = await this.usersService.findOne(id);
@@ -92,10 +76,6 @@ export class UsersController {
     };
   }
 
-  /**
-   * Actualizar un usuario
-   * PATCH /users/:id
-   */
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -111,10 +91,6 @@ export class UsersController {
     };
   }
 
-  /**
-   * Eliminar un usuario (soft delete)
-   * DELETE /users/:id
-   */
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   async remove(@Param('id') id: string, @Lang() lang: string) {
@@ -125,10 +101,6 @@ export class UsersController {
     };
   }
 
-  /**
-   * Restaurar un usuario eliminado
-   * POST /users/:id/restore
-   */
   @Post(':id/restore')
   async restore(@Param('id') id: string, @Lang() lang: string) {
     const user = await this.usersService.restore(id);
@@ -140,13 +112,42 @@ export class UsersController {
     };
   }
 
-  /**
-   * Obtener perfil del usuario actual
-   * GET /users/me/profile
-   */
+  @Post(':id/unlock')
+  async unlockAccount(@Param('id') id: string, @Lang() lang: string) {
+    await this.usersService.unlockAccount(id);
+
+    return {
+      message: this.translation.translate('user.unlocked', {}, lang),
+    };
+  }
+
+  @Post(':id/verify-email')
+  async verifyEmail(@Param('id') id: string, @Lang() lang: string) {
+    await this.usersService.verifyEmail(id);
+
+    return {
+      message: this.translation.translate('user.emailVerified', {}, lang),
+    };
+  }
+
+  @Patch(':id/status')
+  async changeStatus(
+    @Param('id') id: string,
+    @Body('status') status: UserStatus,
+    @Lang() lang: string,
+  ) {
+    const user = await this.usersService.changeStatus(id, status);
+    const { password, ...userWithoutPassword } = user;
+
+    return {
+      message: this.translation.translate('user.statusChanged', {}, lang),
+      data: userWithoutPassword,
+    };
+  }
+
   @Get('me/profile')
   async getProfile(@Lang() lang: string) {
-    // Aquí normalmente obtendrías el ID del usuario del JWT
+    // TODO: Obtener userId del JWT token
     // const userId = req.user.id;
     
     return {
@@ -155,16 +156,12 @@ export class UsersController {
     };
   }
 
-  /**
-   * Actualizar perfil del usuario actual
-   * PATCH /users/me/profile
-   */
   @Patch('me/profile')
   async updateProfile(
     @Body(new ZodValidationPipe(updateUserSchema)) updateUserDto: UpdateUserDto,
     @Lang() lang: string,
   ) {
-    // Aquí normalmente obtendrías el ID del usuario del JWT
+    // TODO: Obtener userId del JWT token
     // const userId = req.user.id;
     
     return {

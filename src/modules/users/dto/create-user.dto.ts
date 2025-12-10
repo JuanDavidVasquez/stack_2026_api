@@ -11,6 +11,11 @@ import { z } from 'zod';
  */
 
 export const createUserSchema = z.object({
+  username: z
+    .string()
+    .min(3, 'validation.minLength')
+    .max(50, 'validation.maxLength')
+    .regex(/^[a-zA-Z0-9_.-]+$/, 'validation.usernameFormat'),
   email: z
     .string()
     .min(1, 'validation.isNotEmpty')
