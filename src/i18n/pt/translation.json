@@ -1,0 +1,110 @@
+{
+  "common": {
+    "welcome": "Bem-vindo",
+    "hello": "Olá",
+    "goodbye": "Adeus",
+    "success": "Operação bem-sucedida",
+    "error": "Ocorreu um erro",
+    "notFound": "Recurso não encontrado",
+    "unauthorized": "Acesso não autorizado",
+    "forbidden": "Proibido",
+    "serverError": "Erro interno do servidor",
+    "validationError": "Erro de validação"
+  },
+  "auth": {
+    "login": {
+      "success": "Login bem-sucedido",
+      "failed": "Credenciais inválidas",
+      "emailRequired": "Email é obrigatório",
+      "passwordRequired": "Senha é obrigatória"
+    },
+    "register": {
+      "success": "Registro bem-sucedido",
+      "emailExists": "Email já existe",
+      "weakPassword": "Senha é muito fraca"
+    },
+    "logout": {
+      "success": "Logout bem-sucedido"
+    },
+    "token": {
+      "invalid": "Token inválido",
+      "expired": "Token expirado",
+      "missing": "Token ausente"
+    }
+  },
+  "user": {
+    "created": "Usuário criado com sucesso",
+    "updated": "Usuário atualizado com sucesso",
+    "deleted": "Usuário excluído com sucesso",
+    "notFound": "Usuário não encontrado",
+    "list": "Usuários obtidos com sucesso",
+    "profile": {
+      "updated": "Perfil atualizado com sucesso",
+      "imageUploaded": "Imagem de perfil enviada com sucesso",
+      "retrieved": "Perfil obtido com sucesso"
+    },
+    "restored": "Usuário restaurado com sucesso",
+    "emailExists": "Email já existe"
+  },
+  "validation": {
+    "isEmail": "{field} deve ser um email válido",
+    "isString": "{field} deve ser uma string",
+    "isNumber": "{field} deve ser um número",
+    "isBoolean": "{field} deve ser um booleano",
+    "isDate": "{field} deve ser uma data válida",
+    "minLength": "{field} deve ter pelo menos {min} caracteres",
+    "maxLength": "{field} não deve ter mais de {max} caracteres",
+    "min": "{field} deve ser pelo menos {min}",
+    "max": "{field} não deve ser maior que {max}",
+    "isNotEmpty": "{field} não pode estar vazio",
+    "isOptional": "{field} é opcional",
+    "matches": "Formato de {field} é inválido",
+    "isUUID": "{field} deve ser um UUID válido",
+    "isUrl": "{field} deve ser uma URL válida",
+    "isPhoneNumber": "{field} deve ser um número de telefone válido",
+    "passwordStrength": "Senha deve conter maiúsculas, minúsculas, números e caracteres especiais"
+  },
+  "database": {
+    "connectionError": "Erro de conexão com banco de dados",
+    "queryError": "Erro na consulta ao banco de dados",
+    "duplicateEntry": "Entrada duplicada detectada",
+    "foreignKeyConstraint": "Violação de restrição de chave estrangeira"
+  },
+  "file": {
+    "uploadSuccess": "Arquivo enviado com sucesso",
+    "uploadFailed": "Falha ao enviar arquivo",
+    "invalidFormat": "Formato de arquivo inválido",
+    "tooLarge": "Tamanho do arquivo excede o limite",
+    "notFound": "Arquivo não encontrado"
+  },
+  "pagination": {
+    "page": "Página",
+    "perPage": "Por página",
+    "total": "Total",
+    "showing": "Mostrando {from} a {to} de {total} entradas"
+  },
+  "email": {
+    "sent": "Email enviado com sucesso",
+    "failed": "Falha ao enviar email",
+    "invalidAddress": "Endereço de email inválido",
+    "templates": {
+      "welcome": {
+        "subject": "Bem-vindo à nossa plataforma",
+        "body": "Bem-vindo {name}! Estamos felizes em tê-lo."
+      },
+      "resetPassword": {
+        "subject": "Redefinir sua senha",
+        "body": "Clique aqui para redefinir sua senha: {link}"
+      }
+    }
+  },
+  "errors": {
+    "badRequest": "Solicitação incorreta",
+    "notFound": "Não encontrado",
+    "unauthorized": "Não autorizado",
+    "forbidden": "Proibido",
+    "internalError": "Erro interno do servidor",
+    "serviceUnavailable": "Serviço indisponível",
+    "tooManyRequests": "Muitas solicitações"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "hello": "Hello",
+    "goodbye": "Goodbye",
+    "success": "Operation successful",
+    "error": "An error occurred",
+    "notFound": "Resource not found",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Forbidden",
+    "serverError": "Internal server error",
+    "validationError": "Validation error"
+  },
+  "auth": {
+    "login": {
+      "success": "Login successful",
+      "failed": "Invalid credentials",
+      "emailRequired": "Email is required",
+      "passwordRequired": "Password is required"
+    },
+    "register": {
+      "success": "Registration successful",
+      "emailExists": "Email already exists",
+      "weakPassword": "Password is too weak"
+    },
+    "logout": {
+      "success": "Logout successful"
+    },
+    "token": {
+      "invalid": "Invalid token",
+      "expired": "Token expired",
+      "missing": "Token missing"
+    }
+  },
+  "user": {
+    "created": "User created successfully",
+    "updated": "User updated successfully",
+    "deleted": "User deleted successfully",
+    "notFound": "User not found",
+    "list": "Users retrieved successfully en",
+    "profile": {
+      "updated": "Profile updated successfully",
+      "imageUploaded": "Profile image uploaded successfully",
+      "retrieved": "Profile retrieved successfully"
+    },
+    "restored": "User restored successfully",
+    "emailExists": "Email already exists"
+  },
+  "validation": {
+    "isEmail": "{field} must be a valid email",
+    "isString": "{field} must be a string",
+    "isNumber": "{field} must be a number",
+    "isBoolean": "{field} must be a boolean",
+    "isDate": "{field} must be a valid date",
+    "minLength": "{field} must be at least {min} characters long",
+    "maxLength": "{field} must be no more than {max} characters long",
+    "min": "{field} must be at least {min}",
+    "max": "{field} must be no more than {max}",
+    "isNotEmpty": "{field} cannot be empty",
+    "isOptional": "{field} is optional",
+    "matches": "{field} format is invalid",
+    "isUUID": "{field} must be a valid UUID",
+    "isUrl": "{field} must be a valid URL",
+    "isPhoneNumber": "{field} must be a valid phone number",
+    "passwordStrength": "Password must contain uppercase, lowercase, numbers and special characters"
+  },
+  "database": {
+    "connectionError": "Database connection error",
+    "queryError": "Database query error",
+    "duplicateEntry": "Duplicate entry detected",
+    "foreignKeyConstraint": "Foreign key constraint violation"
+  },
+  "file": {
+    "uploadSuccess": "File uploaded successfully",
+    "uploadFailed": "File upload failed",
+    "invalidFormat": "Invalid file format",
+    "tooLarge": "File size exceeds limit",
+    "notFound": "File not found"
+  },
+  "pagination": {
+    "page": "Page",
+    "perPage": "Per page",
+    "total": "Total",
+    "showing": "Showing {from} to {to} of {total} entries"
+  },
+  "email": {
+    "sent": "Email sent successfully",
+    "failed": "Email sending failed",
+    "invalidAddress": "Invalid email address",
+    "templates": {
+      "welcome": {
+        "subject": "Welcome to our platform",
+        "body": "Welcome {name}! We're glad to have you."
+      },
+      "resetPassword": {
+        "subject": "Reset your password",
+        "body": "Click here to reset your password: {link}"
+      }
+    }
+  },
+  "errors": {
+    "badRequest": "Bad request",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "internalError": "Internal server error",
+    "serviceUnavailable": "Service unavailable",
+    "tooManyRequests": "Too many requests"
+  }
+}

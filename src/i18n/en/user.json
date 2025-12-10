@@ -1,0 +1,11 @@
+{
+  "list": "Users retrieved successfully",
+  "created": "User created successfully",
+  "updated": "User updated successfully",
+  "deleted": "User deleted successfully",
+  "notFound": "User not found",
+  "alreadyExists": "User already exists",
+  "invalidCredentials": "Invalid credentials",
+  "emailAlreadyExists": "Email already exists",
+  "usernameAlreadyExists": "Username already exists"
+}
