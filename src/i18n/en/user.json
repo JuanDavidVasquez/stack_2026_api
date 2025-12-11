@@ -7,5 +7,29 @@
   "alreadyExists": "User already exists",
   "invalidCredentials": "Invalid credentials",
   "emailAlreadyExists": "Email already exists",
-  "usernameAlreadyExists": "Username already exists"
+  "usernameAlreadyExists": "Username already exists",
+  "statusChanged": "User status changed successfully",
+  "profile":{
+    "title": "User Profile",
+    "edit": "Edit Profile",
+    "changePassword": "Change Password",
+    "retrieved": "Profile retrieved successfully",
+    "updated": "Profile updated successfully"
+  },
+  "status":{
+    "active": "Active",
+    "inactive": "Inactive",
+    "banned": "Banned"
+  },
+  "emailExists": "Email is already in use",
+  "usernameExists": "Username is already in use",
+  "registered": "User registered successfully",
+  "email":{
+    "verificationSent": "Verification email sent successfully",
+    "verified": "Email verified successfully",
+    "verification":{
+      "subject": "Email Verification",
+      "body": "Please verify your email by clicking the following link: {{verificationLink}}"
+    }
+  }
 }

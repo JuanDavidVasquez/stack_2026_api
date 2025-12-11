@@ -13,18 +13,18 @@
   },
   "auth": {
     "login": {
-      "success": "Login bem-sucedido",
+      "success": "Login realizado com sucesso",
       "failed": "Credenciais inválidas",
-      "emailRequired": "Email é obrigatório",
-      "passwordRequired": "Senha é obrigatória"
+      "emailRequired": "O e-mail é obrigatório",
+      "passwordRequired": "A senha é obrigatória"
     },
     "register": {
-      "success": "Registro bem-sucedido",
-      "emailExists": "Email já existe",
-      "weakPassword": "Senha é muito fraca"
+      "success": "Registro realizado com sucesso",
+      "emailExists": "O e-mail já existe",
+      "weakPassword": "A senha é muito fraca"
     },
     "logout": {
-      "success": "Logout bem-sucedido"
+      "success": "Logout realizado com sucesso"
     },
     "token": {
       "invalid": "Token inválido",
@@ -44,62 +44,110 @@
       "retrieved": "Perfil obtido com sucesso"
     },
     "restored": "Usuário restaurado com sucesso",
-    "emailExists": "Email já existe"
+    "emailExists": "O e-mail já existe"
   },
   "validation": {
-    "isEmail": "{field} deve ser um email válido",
+    "isEmail": "{field} deve ser um e-mail válido",
     "isString": "{field} deve ser uma string",
     "isNumber": "{field} deve ser um número",
-    "isBoolean": "{field} deve ser um booleano",
+    "isBoolean": "{field} deve ser um valor booleano",
     "isDate": "{field} deve ser uma data válida",
     "minLength": "{field} deve ter pelo menos {min} caracteres",
-    "maxLength": "{field} não deve ter mais de {max} caracteres",
-    "min": "{field} deve ser pelo menos {min}",
+    "maxLength": "{field} não deve ter mais que {max} caracteres",
+    "min": "{field} deve ser no mínimo {min}",
     "max": "{field} não deve ser maior que {max}",
     "isNotEmpty": "{field} não pode estar vazio",
     "isOptional": "{field} é opcional",
-    "matches": "Formato de {field} é inválido",
+    "matches": "O formato de {field} é inválido",
     "isUUID": "{field} deve ser um UUID válido",
     "isUrl": "{field} deve ser uma URL válida",
     "isPhoneNumber": "{field} deve ser um número de telefone válido",
-    "passwordStrength": "Senha deve conter maiúsculas, minúsculas, números e caracteres especiais"
+    "passwordStrength": "A senha deve conter letras maiúsculas, minúsculas, números e caracteres especiais"
   },
   "database": {
-    "connectionError": "Erro de conexão com banco de dados",
+    "connectionError": "Erro de conexão com o banco de dados",
     "queryError": "Erro na consulta ao banco de dados",
     "duplicateEntry": "Entrada duplicada detectada",
     "foreignKeyConstraint": "Violação de restrição de chave estrangeira"
   },
   "file": {
     "uploadSuccess": "Arquivo enviado com sucesso",
-    "uploadFailed": "Falha ao enviar arquivo",
+    "uploadFailed": "Falha ao enviar o arquivo",
     "invalidFormat": "Formato de arquivo inválido",
-    "tooLarge": "Tamanho do arquivo excede o limite",
+    "tooLarge": "O tamanho do arquivo excede o limite",
     "notFound": "Arquivo não encontrado"
   },
   "pagination": {
     "page": "Página",
     "perPage": "Por página",
     "total": "Total",
-    "showing": "Mostrando {from} a {to} de {total} entradas"
+    "showing": "Mostrando {from} a {to} de {total} registros"
   },
   "email": {
-    "sent": "Email enviado com sucesso",
-    "failed": "Falha ao enviar email",
-    "invalidAddress": "Endereço de email inválido",
-    "templates": {
-      "welcome": {
-        "subject": "Bem-vindo à nossa plataforma",
-        "body": "Bem-vindo {name}! Estamos felizes em tê-lo."
-      },
-      "resetPassword": {
-        "subject": "Redefinir sua senha",
-        "body": "Clique aqui para redefinir sua senha: {link}"
-      }
+    "sent": "E-mail enviado com sucesso",
+    "failed": "Falha ao enviar o e-mail",
+    "invalidAddress": "Endereço de e-mail inválido",
+    "verification": {
+      "subject": "Verifique sua conta - {{appName}}",
+      "title": "Verifique sua conta",
+      "greeting": "Olá {{firstName}}!",
+      "message": "Obrigado por se registrar. Use o código abaixo para verificar sua conta:",
+      "codeLabel": "Seu código de verificação:",
+      "expiresIn": "Este código expirará em {{expiresIn}} minutos",
+      "securityNote": "Se você não solicitou este código, ignore este e-mail.",
+      "closing": "Atenciosamente, Equipe {{appName}}"
+    },
+    "welcome": {
+      "subject": "Bem-vindo ao {{appName}}, {{firstName}}!",
+      "title": "Bem-vindo!",
+      "greeting": "Bem-vindo, {{firstName}}!",
+      "message": "Sua conta foi verificada com sucesso e já está ativa.",
+      "accountReady": "Sua conta está pronta para uso!",
+      "loginButton": "Entrar",
+      "nextSteps": "Próximos passos:",
+      "step1": "Complete seu perfil",
+      "step2": "Explore os recursos",
+      "step3": "Configure suas preferências",
+      "closing": "Se tiver alguma dúvida, entre em contato conosco."
+    },
+    "passwordReset": {
+      "subject": "Recuperação de Senha - {{appName}}",
+      "title": "Recuperação de Senha",
+      "greeting": "Olá {{firstName}},",
+      "message": "Recebemos uma solicitação para redefinir a senha da sua conta.",
+      "instruction": "Clique no botão abaixo para criar uma nova senha:",
+      "resetButton": "Redefinir senha",
+      "expiresIn": "Este link expirará em {{expiresIn}} minutos",
+      "alternativeText": "Se o botão não funcionar, copie e cole o link abaixo no seu navegador:",
+      "securityNote": "Se você não solicitou a redefinição, ignore este e-mail. Sua conta permanecerá segura.",
+      "closing": "Atenciosamente, Equipe {{appName}}"
+    },
+    "passwordChanged": {
+      "subject": "Sua senha foi atualizada - {{appName}}",
+      "title": "Senha Atualizada",
+      "greeting": "Olá {{firstName}},",
+      "message": "Confirmamos que a senha da sua conta foi alterada com sucesso.",
+      "successMessage": "Sua senha foi atualizada",
+      "loginMessage": "Agora você pode fazer login com sua nova senha.",
+      "securityWarning": "Não foi você?",
+      "securityMessage": "Se você não fez essa alteração, sua conta pode estar comprometida. Entre em contato imediatamente com nossa equipe de suporte:",
+      "securityTipsTitle": "Dicas de segurança:",
+      "tip1": "Use senhas únicas para cada serviço",
+      "tip2": "Ative a autenticação de dois fatores",
+      "tip3": "Nunca compartilhe sua senha com ninguém",
+      "tip4": "Atualize sua senha regularmente",
+      "closing": "Atenciosamente, Equipe {{appName}}"
+    },
+    "appName": "OneLesson",
+    "companyName": "OneLesson",
+    "footer": {
+      "copyright": "© {{year}} {{companyName}}. Todos os direitos reservados.",
+      "privacy": "Política de Privacidade",
+      "terms": "Termos e Condições"
     }
   },
   "errors": {
-    "badRequest": "Solicitação incorreta",
+    "badRequest": "Solicitação inválida",
     "notFound": "Não encontrado",
     "unauthorized": "Não autorizado",
     "forbidden": "Proibido",

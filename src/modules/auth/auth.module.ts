@@ -7,7 +7,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { RefreshTokenService } from './services/refresh-token.service';
 import { JwtStrategy, JwtRefreshStrategy } from './strategies';
-import { JwtAuthGuard, JwtRefreshGuard, RolesGuard } from './guards';
+import { ActiveUserGuard, JwtAuthGuard, JwtRefreshGuard, RolesGuard } from './guards';
 import { RefreshToken, User } from 'src/models';
 import { UsersModule } from '../users/users.module';
 import { CommonModule } from 'src/common/common.module';
@@ -39,13 +39,18 @@ import { APP_GUARD } from '@nestjs/core';
     JwtAuthGuard,
     JwtRefreshGuard,
     RolesGuard,
+    // Guards globales en orden de ejecución
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: JwtAuthGuard, // 1. Validar JWT
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: ActiveUserGuard, // 2. Validar usuario activo y verificado
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, // 3. Validar roles
     },
   ],
   exports: [AuthService, RefreshTokenService],

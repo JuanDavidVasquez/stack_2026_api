@@ -223,7 +223,7 @@ export const envSchema = z
       .pipe(z.number().positive())
       .optional(),
 
-    SMTP_USER: z.string().email().optional(),
+    SMTP_USER: z.string().optional(),
 
     SMTP_PASSWORD: z.string().optional(),
 

@@ -6,7 +6,16 @@
     "deleteOutDir": true,
     "assets": [
       {
+        "include": "**/*.hbs",
+        "outDir": "dist",
+        "watchAssets": true
+      },
+      {
         "include": "i18n/**/*",
+        "outDir": "dist"
+      },
+      {
+        "include": "common/mail/templates/**/*",
         "outDir": "dist"
       }
     ],

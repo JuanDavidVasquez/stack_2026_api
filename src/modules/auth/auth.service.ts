@@ -65,6 +65,10 @@ export class AuthService {
       throw new UnauthorizedException('auth.login.invalidCredentials');
     }
 
+    if(user.status === UserStatus.PENDING) {
+      throw new UnauthorizedException('auth.login.accountPending');
+    }
+
     if (user.isLocked()) {
       const minutesLeft = Math.ceil(
         (user.lockedUntil!.getTime() - Date.now()) / (1000 * 60)

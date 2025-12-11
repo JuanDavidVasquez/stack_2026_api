@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { createUserSchema } from './create-user.dto';
+import { UserStatus } from 'src/models/enums';
 
 
 /**
@@ -21,4 +22,16 @@ export const updateUserSchema = createUserSchema.partial().extend({
   avatar: z.string().url('validation.isUrl').optional(),
 });
 
+export const updateStatusSchema = z.object({
+  status: z.enum(Object.values(UserStatus) as [string, ...string[]]).superRefine((val, ctx) => {
+    if (!Object.values(UserStatus).includes(val as UserStatus)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'validation.invalidEnumValue',
+      });
+    }
+  }),
+});
+
 export type UpdateUserDto = z.infer<typeof updateUserSchema>;
+export type UpdateStatusDto = z.infer<typeof updateStatusSchema>;

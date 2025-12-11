@@ -1,3 +1,4 @@
+import { logger } from 'nestjs-i18n';
 import { envSchema } from './env.schema';
 
 export function validate(config: Record<string, unknown>) {
@@ -10,6 +11,5 @@ export function validate(config: Record<string, unknown>) {
     
     throw new Error('Invalid environment variables');
   }
-
   return result.data;
 }

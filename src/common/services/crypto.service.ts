@@ -140,6 +140,10 @@ export class CryptoService {
     }
   }
 
+    async comparePassword(plain: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(plain, hash);
+  }
+
   // ==================== HASH (Datos no sensibles) ====================
 
   /**

@@ -1,9 +1,9 @@
 {
-    "success": "Operation successful",
-    "error": "An error occurred",
-    "notFound": "Resource not found",
-    "unauthorized": "Unauthorized access",
-    "forbidden": "Forbidden",
-    "serverError": "Internal server error",
-    "validationError": "Validation error"
+    "success": "Operación exitosa",
+    "error": "Ocurrió un error",
+    "notFound": "Recurso no encontrado",
+    "unauthorized": "Acceso no autorizado",
+    "forbidden": "Prohibido",
+    "serverError": "Error interno del servidor",
+    "validationError": "Error de validación"
 }

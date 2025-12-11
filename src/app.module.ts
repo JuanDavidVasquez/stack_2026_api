@@ -31,6 +31,8 @@ import { I18nExceptionFilter } from './common/filters/i18n-exception.filter';
 import { I18nValidationPipe } from './common/pipes/i18n-validation.pipe';
 import { LanguageInterceptor } from './common/interceptors/language.interceptor'; // ← NUEVO
 import { I18nTestModule } from './modules/i18n-test/i18n.test.module';
+import { OnboardingModule } from './modules/onboarding/onboarding.module';
+import { logger } from 'handlebars';
 
 @Module({
   imports: [
@@ -52,12 +54,12 @@ I18nModule.forRootAsync({
       watch: configService.get<string>('environment') === 'local',
     },
   }),
-  resolvers: [
-    { use: QueryResolver, options: ['lang'] },        // ?lang=es
-    new HeaderResolver(['x-lang']),                   // Header: x-lang: es
-    AcceptLanguageResolver,                           // Header: Accept-Language
-    new CookieResolver(['lang', 'i18nLang']),        // Cookie: lang=es
-  ],
+    resolvers: [
+      { use: QueryResolver, options: ['lang'] },    
+      new HeaderResolver(['x-lang']),      
+      new CookieResolver(['lang', 'i18nLang']),
+      AcceptLanguageResolver,   
+    ],
   inject: [ConfigService],
 }),
 
@@ -124,33 +126,53 @@ I18nModule.forRootAsync({
           }),
         ]
       : []),
+// ==================== REDIS ====================
+...(process.env.ENABLE_REDIS === 'true'
+  ? [
+      RedisModule.forRootAsync({
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => {
+          const host = configService.get<string>('redis.host');
+          const port = configService.get<number>('redis.port');
+          const password = configService.get<string>('redis.password');
+          const db = configService.get<number>('redis.db');
 
-    // ==================== REDIS ====================
-    // Solo se importa si ENABLE_REDIS=true
-    ...(process.env.ENABLE_REDIS === 'true'
-      ? [
-          RedisModule.forRootAsync({
-            imports: [ConfigModule],
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-              type: 'single',
-              options: {
-                host: configService.get<string>('redis.host'),
-                port: configService.get<number>('redis.port'),
-                password:
-                  configService.get<string>('redis.password') || undefined,
-                db: configService.get<number>('redis.db'),
+          console.log('🔌 Redis config:', { host, port, password, db });
+
+          return {
+            type: 'single',
+            options: {
+              host,
+              port,
+              password,
+              db,
+
+              // 🔁 Reconexión automática si Redis se cae
+              retryStrategy: (times) => {
+                console.log(`⚠️ Redis retry #${times}`);
+                return Math.min(times * 500, 2000); // intervalo creciente
               },
-            }),
-          }),
-        ]
-      : []),
+
+              // 🚨 Manejo de errores
+              reconnectOnError(err) {
+                console.error('❌ Redis error:', err);
+                return true;
+              },
+            },
+          };
+        },
+      }),
+    ]
+  : []),
+
 
     // ==================== APP MODULES ====================
     CommonModule,
     UsersModule,
     AuthModule,
-    I18nTestModule, 
+    I18nTestModule,
+    OnboardingModule, 
   ],
   providers: [
     // Global i18n exception filter

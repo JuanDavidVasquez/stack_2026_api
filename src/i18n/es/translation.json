@@ -1,4 +1,6 @@
 {
+  "appName": "OneLesson",
+  "companyName": "OneLesson",
   "common": {
     "welcome": "Bienvenido",
     "hello": "Hola",
@@ -38,13 +40,13 @@
     "deleted": "Usuario eliminado exitosamente",
     "notFound": "Usuario no encontrado",
     "list": "Usuarios obtenidos exitosamente",
+    "restored": "Usuario restaurado exitosamente",
+    "emailExists": "El correo electrónico ya existe",
     "profile": {
       "updated": "Perfil actualizado exitosamente",
       "imageUploaded": "Imagen de perfil cargada exitosamente",
       "retrieved": "Perfil obtenido exitosamente"
-    },
-    "restored": "Usuario restaurado exitosamente",
-    "emailExists": "El correo electrónico ya existe"
+    }
   },
   "validation": {
     "isEmail": "{field} debe ser un correo electrónico válido",
@@ -87,14 +89,66 @@
     "sent": "Correo enviado exitosamente",
     "failed": "Falló el envío del correo",
     "invalidAddress": "Dirección de correo electrónico inválida",
-    "templates": {
-      "welcome": {
-        "subject": "Bienvenido a nuestra plataforma",
-        "body": "¡Bienvenido {name}! Nos alegra tenerte."
+    "footer": {
+      "copyright": "© {{year}} {{companyName}}. Todos los derechos reservados.",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos y Condiciones"
+    },
+    "verification":{
+      "subject": "Verifica tu dirección de correo electrónico",
+      "verificationBody": "Hola {{name}},\n\nPor favor verifica tu dirección de correo electrónico haciendo clic en el siguiente enlace:\n\n{{verificationLink}}\n\n¡Gracias por unirte a nosotros!\n\nSaludos,\nEl Equipo"
+    },
+    "translation": {
+      "verification": {
+        "subject": "Verifica tu cuenta - {{appName}}",
+        "title": "Verifica tu cuenta",
+        "greeting": "¡Hola {{firstName}}!",
+        "message": "Gracias por registrarte. Usa el siguiente código para verificar tu cuenta:",
+        "codeLabel": "Tu código de verificación:",
+        "expiresIn": "Este código expirará en {{expiresIn}} minutos",
+        "securityNote": "Si no solicitaste este código, por favor ignora este email.",
+        "closing": "Saludos, El equipo de {{appName}}"
       },
-      "resetPassword": {
-        "subject": "Restablece tu contraseña",
-        "body": "Haz clic aquí para restablecer tu contraseña: {link}"
+      "welcome": {
+        "subject": "¡Bienvenido a {{appName}}, {{firstName}}!",
+        "title": "¡Bienvenido!",
+        "greeting": "¡Bienvenido, {{firstName}}!",
+        "message": "Tu cuenta ha sido verificada exitosamente y ya está activa.",
+        "accountReady": "¡Tu cuenta está lista para usar!",
+        "loginButton": "Iniciar Sesión",
+        "nextSteps": "Próximos pasos:",
+        "step1": "Completa tu perfil",
+        "step2": "Explora las funcionalidades",
+        "step3": "Configura tus preferencias",
+        "closing": "Si tienes alguna pregunta, no dudes en contactarnos."
+      },
+      "passwordReset": {
+        "subject": "Recuperación de Contraseña - {{appName}}",
+        "title": "Recuperación de Contraseña",
+        "greeting": "Hola {{firstName}},",
+        "message": "Recibimos una solicitud para restablecer la contraseña de tu cuenta.",
+        "instruction": "Haz clic en el siguiente botón para crear una nueva contraseña:",
+        "resetButton": "Restablecer Contraseña",
+        "expiresIn": "Este enlace expirará en {{expiresIn}} minutos",
+        "alternativeText": "Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:",
+        "securityNote": "Si no solicitaste restablecer tu contraseña, por favor ignora este email. Tu cuenta permanecerá segura.",
+        "closing": "Saludos, El equipo de {{appName}}"
+      },
+      "passwordChanged": {
+        "subject": "Tu contraseña ha sido actualizada - {{appName}}",
+        "title": "Contraseña Actualizada",
+        "greeting": "Hola {{firstName}},",
+        "message": "Te confirmamos que la contraseña de tu cuenta ha sido cambiada exitosamente.",
+        "successMessage": "Tu contraseña ha sido actualizada",
+        "loginMessage": "Ahora puedes iniciar sesión con tu nueva contraseña.",
+        "securityWarning": "¿No fuiste tú?",
+        "securityMessage": "Si no realizaste este cambio, tu cuenta podría estar comprometida. Por favor contacta a nuestro equipo de soporte inmediatamente en:",
+        "securityTipsTitle": "Consejos de seguridad:",
+        "tip1": "Usa contraseñas únicas para cada servicio",
+        "tip2": "Habilita la autenticación de dos factores",
+        "tip3": "Nunca compartas tu contraseña con nadie",
+        "tip4": "Actualiza tu contraseña regularmente",
+        "closing": "Saludos, El equipo de {{appName}}"
       }
     }
   },

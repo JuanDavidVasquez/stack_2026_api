@@ -13,7 +13,16 @@ import { I18nContext } from 'nestjs-i18n';
 export const Lang = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): string => {
     const i18n = I18nContext.current(ctx);
-    return i18n?.lang || 'en';
+    const lang = i18n?.lang || 'en';
+    
+    // ✅ Limpieza del idioma
+    const cleanLang = lang
+      .split(',')[0]      
+      .split('-')[0]    
+      .trim()           
+      .toLowerCase();  
+    
+    return cleanLang;
   },
 );
 

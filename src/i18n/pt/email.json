@@ -1,0 +1,12 @@
+{
+    "welcomeSubject": "Bem-vindo ao Nosso Serviço!",
+    "welcomeBody": "Olá {{name}},\n\nObrigado por se juntar ao nosso serviço. Estamos entusiasmados em tê-lo a bordo!\n\nAtenciosamente,\nA Equipe",
+    "resetPasswordSubject": "Solicitação de Redefinição de Senha",
+    "resetPasswordBody": "Olá {{name}},\n\nRecebemos uma solicitação para redefinir sua senha. Clique no link abaixo para prosseguir:\n\n{{resetLink}}\n\nSe você não solicitou a redefinição de senha, por favor, ignore este e-mail.\n\nAtenciosamente,\nA Equipe",
+    "email":{
+        "verification":{
+            "subject": "Verifique Seu Endereço de E-mail",
+            "verificationBody": "Olá {{name}},\n\nPor favor, verifique seu endereço de e-mail clicando no link abaixo:\n\n{{verificationLink}}\n\nObrigado por se juntar a nós!\n\nAtenciosamente,\nA Equipe"
+        }
+    }
+}

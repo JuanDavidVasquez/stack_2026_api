@@ -1,0 +1,12 @@
+{
+    "welcomeSubject": "¡Bienvenido a Nuestro Servicio!",
+    "welcomeBody": "Hola {{name}},\n\nGracias por unirte a nuestro servicio. ¡Estamos emocionados de tenerte a bordo!\n\nSaludos cordiales,\nEl Equipo",
+    "resetPasswordSubject": "Solicitud de Restablecimiento de Contraseña",
+    "resetPasswordBody": "Hola {{name}},\n\nHemos recibido una solicitud para restablecer tu contraseña. Haz clic en el enlace a continuación para continuar:\n\n{{resetLink}}\n\nSi no solicitaste un restablecimiento de contraseña, por favor ignora este correo electrónico.\n\nSaludos cordiales,\nEl Equipo",
+    "email":{
+        "verification":{
+            "subject": "Verifica Tu Dirección de Correo Electrónico",
+            "verificationBody": "Hola {{name}},\n\nPor favor, verifica tu dirección de correo electrónico haciendo clic en el enlace a continuación:\n\n{{verificationLink}}\n\n¡Gracias por unirte a nosotros!\n\nSaludos cordiales,\nEl Equipo"
+        }
+    }
+}

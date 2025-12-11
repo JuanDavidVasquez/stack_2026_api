@@ -7,5 +7,22 @@
   "alreadyExists": "El usuario ya existe",
   "invalidCredentials": "Credenciales inválidas",
   "emailAlreadyExists": "El correo electrónico ya existe",
-  "usernameAlreadyExists": "El nombre de usuario ya existe"
+  "usernameAlreadyExists": "El nombre de usuario ya existe",
+  "statusChanged": "Estado del usuario cambiado exitosamente",
+  "profile":{
+    "title": "Perfil de Usuario",
+    "edit": "Editar Perfil",
+    "changePassword": "Cambiar Contraseña",
+    "retrieved": "Perfil obtenido exitosamente",
+    "updated": "Perfil actualizado exitosamente"
+  },
+  "status":{
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "banned": "Prohibido"
+  },
+  "emailExists": "El correo electrónico ya está en uso",
+  "usernameExists": "El nombre de usuario ya está en uso",
+  "registered": "Usuario registrado exitosamente"
+
 }
