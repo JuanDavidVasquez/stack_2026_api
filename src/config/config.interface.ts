@@ -67,4 +67,8 @@ export interface Config {
     algorithm: string;
     bcryptRounds: number;
   };
+  urls:{
+    frontend: string;
+    api: string;
+  };
 }

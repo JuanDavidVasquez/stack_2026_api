@@ -1,17 +1,53 @@
-<h1 style="color: #ffffff; font-size: 26px; margin: 0 0 15px 0;">
-  Verifica tu correo ✉️
-</h1>
+<div style="width: 100%; background-color: #0f1117; padding: 40px 0; font-family: Arial, Helvetica, sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="background-color: #1a1d27; border-radius: 10px; padding: 40px;">
 
-<p style="color: #c9c9ce; font-size: 14px; line-height: 22px; margin: 0 0 25px 0;">
-  ¡Hola {{name}}! Debes verificar tu email para completar el registro en <strong>{{companyName}}</strong>.
-</p>
+          <tr>
+            <td align="center" style="padding-bottom: 20px;">
+              <h1 style="color: #ffffff; font-size: 28px; margin: 0; font-weight: 600;">
+                Verifica tu correo electrónico ✉️
+              </h1>
+            </td>
+          </tr>
 
-<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto 30px;">
-  <tr>
-    <td align="center" style="background-color: #7b83ff; border-radius: 4px;">
-      <a href="{{actionUrl}}" style="display: inline-block; padding: 12px 28px; color: #ffffff; font-weight: bold; text-decoration: none;">
-        Verificar email
-      </a>
-    </td>
-  </tr>
-</table>
+          <tr>
+            <td style="color: #b5b5be; font-size: 16px; line-height: 26px; padding-bottom: 30px;">
+              Hola <strong>{{name}}</strong>,
+              <br><br>
+              Para completar tu registro en <strong>{{companyName}}</strong>, por favor confirma tu correo electrónico haciendo clic en el botón a continuación.
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding-bottom: 35px;">
+              <a href="{{actionUrl}}"
+                 style="background: linear-gradient(90deg, #6a5afd, #8c7bff); padding: 14px 36px; color: #ffffff; text-decoration: none;
+                        font-size: 15px; font-weight: bold; border-radius: 6px; display: inline-block;">
+                Verificar correo
+              </a>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="color: #7e7e87; font-size: 13px; line-height: 20px;">
+              Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
+              <br>
+              <a href="{{actionUrl}}" style="color: #8c7bff; word-break: break-all;">
+                {{actionUrl}}
+              </a>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding-top: 40px; color: #5f616b; font-size: 12px;">
+              © {{year}} {{companyName}}. Todos los derechos reservados.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</div>

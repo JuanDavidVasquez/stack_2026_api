@@ -10,8 +10,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import Redis from 'ioredis';
 import { I18nService } from 'nestjs-i18n';
+import Redis from 'ioredis';
 
 // DTOs
 import {
@@ -48,210 +48,521 @@ export class OnboardingService {
 
   // ==================== UTILS ====================
 
-  private normalizeLang(lang: string): string {
-    if (!lang) return 'es';
-    return lang.split(',')[0].split('-')[0].trim().toLowerCase();
+  /**
+   * Normaliza el idioma desde el header Accept-Language
+   * Maneja formatos como: "es-CO,es;q=0.9,en;q=0.8" -> "es"
+   */
+  private normalizeLang(lang?: string): string {
+    if (!lang) return 'en';
+    
+    // Extraer el primer idioma de la lista y quitar la región
+    const primaryLang = lang.split(',')[0].split('-')[0].trim().toLowerCase();
+    
+    // Validar que sea un idioma soportado
+    const supportedLangs = ['en', 'es', 'pt'];
+    return supportedLangs.includes(primaryLang) ? primaryLang : 'en';
   }
 
-  private getEmailBaseContext() {
-    return {
-      appName: 'OneLesson',
-      year: new Date().getFullYear(),
-      companyName: 'OneLesson',
-      logoUrl: 'https://via.placeholder.com/140x40?text=OneLesson',
-      privacyUrl: '#',
-      termsUrl: '#',
-    };
-  }
+  // ==================== REGISTRO CON TOKEN DE ACTIVACIÓN ====================
 
-  private async getUserByEmail(email: string) {
-    const user = await this.userRepository.findOne({ where: { email: email.toLowerCase() } });
-    if (!user) throw new NotFoundException('user.notFound');
-    return user;
-  }
-
-  // ==================== REGISTRO ====================
-
-  async register(registerDto: RegisterDto, lang = 'es') {
-    lang = this.normalizeLang(lang);
+  async register(
+    registerDto: RegisterDto,
+    lang?: string,
+  ): Promise<{ message: string; email: string }> {
+    const language = this.normalizeLang(lang);
 
     const { email, password, firstName, lastName, phone, username } = registerDto;
 
-    if (await this.userRepository.findOne({ where: { email: email.toLowerCase() } }))
-      throw new ConflictException('user.emailExists');
+    // Verificar si el email ya existe
+    const existingUser = await this.userRepository.findOne({
+      where: { email: email.toLowerCase() },
+    });
 
-    if (await this.userRepository.findOne({ where: { username: username.toLowerCase() } }))
-      throw new ConflictException('user.usernameExists');
+    if (existingUser) {
+      throw new ConflictException(
+        this.i18n.t('user.emailExists', { lang: language }) as string,
+      );
+    }
+
+    // Verificar si el username ya existe
+    const existingUsername = await this.userRepository.findOne({
+      where: { username: username.toLowerCase() },
+    });
+
+    if (existingUsername) {
+      throw new ConflictException(
+        this.i18n.t('user.usernameExists', { lang: language }) as string,
+      );
+    }
+
+    // Crear usuario (inactivo hasta que active su cuenta)
+    const hashedPassword = await this.cryptoService.hashPassword(password);
 
     const user = this.userRepository.create({
       email: email.toLowerCase(),
-      password: await this.cryptoService.hashPassword(password),
+      password: hashedPassword,
       firstName,
       lastName,
       phone,
       username,
-      isActive: false,
       emailVerified: false,
+      isActive: false,
       role: UserRole.USER,
     });
 
     await this.userRepository.save(user);
 
-    const code = this.cryptoService.generateNumericCode(6);
-    await this.redis.setex(`verification:${email.toLowerCase()}`, 900, code);
-
-    const subject = this.i18n.t('user.email.verification.subject', { lang }) as string;
+    // Generar token de activación seguro (64 caracteres hexadecimales)
+    const activationToken = this.cryptoService.generateToken(32);
     
-    await this.mailService.queueEmail({
-      to: email,
-      subject,
-      template: `verification-code/verification-code.${lang}.hbs`,
-      context: {
-        name: firstName,
-        code,
-        actionUrl: `${this.configService.get('frontendUrl')}/login`,
-        expiresIn: 15,
-        ...this.getEmailBaseContext(),
-      },
-    });
+    // Guardar en Redis: token -> userId, expira en 24 horas
+    const redisKey = `activation:${activationToken}`;
+    await this.redis.setex(redisKey, 86400, user.id.toString());
 
-    return { message: 'user.registered', email: email.toLowerCase() };
+    // ✅ ENVIAR EMAIL - Se encola automáticamente
+    await this.mailService.sendTemplatedEmail(
+      email.toLowerCase(),
+      'ACCOUNT_ACTIVATION',
+      {
+        firstName,
+        token: activationToken,
+        expiresIn: 24,
+      },
+      language,
+      {
+        priority: 10, // Alta prioridad
+        attempts: 5,
+      },
+    );
+
+    this.logger.log(`Usuario registrado: ${email} (idioma: ${language})`);
+
+    return {
+      message: this.i18n.t('user.registered', { lang: language }) as string,
+      email: email.toLowerCase(),
+    };
   }
 
-  // ==================== VERIFICACIÓN DE EMAIL ====================
+  // ==================== ACTIVAR CUENTA CON TOKEN ====================
 
-  async verifyEmail(verifyEmailDto: VerifyEmailDto, lang = 'es') {
-    lang = this.normalizeLang(lang);
-    const { email, verificationCode } = verifyEmailDto;
+  async activateAccount(
+    token: string,
+    lang?: string,
+  ): Promise<{ message: string; email: string }> {
+    const language = this.normalizeLang(lang);
 
-    const storedCode = await this.redis.get(`verification:${email.toLowerCase()}`);
-    if (!storedCode) throw new BadRequestException('verification.codeInvalid');
-    if (storedCode !== verificationCode) throw new BadRequestException('verification.codeIncorrect');
+    // Validar formato del token
+    if (!token || token.length !== 64) {
+      throw new BadRequestException(
+        this.i18n.t('activation.invalidToken', { lang: language }) as string,
+      );
+    }
 
-    const user = await this.getUserByEmail(email);
+    const redisKey = `activation:${token}`;
+    const userId = await this.redis.get(redisKey);
 
-    if (user.emailVerified) throw new BadRequestException('verification.alreadyVerified');
+    if (!userId) {
+      throw new BadRequestException(
+        this.i18n.t('activation.tokenExpired', { lang: language }) as string,
+      );
+    }
 
-    user.emailVerified = true;
-    user.isActive = () => true;
-    user.emailVerifiedAt = new Date();
+    // Buscar usuario
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      // Limpiar token inválido
+      await this.redis.del(redisKey);
+      throw new NotFoundException(
+        this.i18n.t('user.notFound', { lang: language }) as string,
+      );
+    }
+
+    // Verificar si ya está activado
+    if (user.emailVerified && user.isActive()) {
+      await this.redis.del(redisKey);
+      throw new BadRequestException(
+        this.i18n.t('activation.alreadyActivated', { lang: language }) as string,
+      );
+    }
+
+    // Activar cuenta
+    user.verifyEmail();
     await this.userRepository.save(user);
-    await this.redis.del(`verification:${email.toLowerCase()}`);
 
-    const subject = this.i18n.t('email.welcome.subject', {
-      lang,
-      args: { name: user.firstName },
-    }) as string;
+    // Eliminar token de Redis (un solo uso)
+    await this.redis.del(redisKey);
 
-    await this.mailService.queueEmail({
-      to: email,
-      subject,
-      template: `welcome/welcome.${lang}.hbs`,
-      context: {
-        name: user.firstName,
-        loginUrl: `${this.configService.get('frontendUrl')}/login`,
-        ...this.getEmailBaseContext(),
+    // ✅ ENVIAR EMAIL DE BIENVENIDA - Se encola automáticamente
+    await this.mailService.sendTemplatedEmail(
+      user.email,
+      'WELCOME',
+      {
+        firstName: user.firstName,
       },
-    });
+      language,
+    );
 
-    return { message: 'verification.success' };
+    this.logger.log(`Cuenta activada exitosamente: ${user.email} (idioma: ${language})`);
+
+    return {
+      message: this.i18n.t('activation.success', { lang: language }) as string,
+      email: user.email,
+    };
   }
 
-  // ==================== REENVIAR VERIFICACIÓN ====================
+  // ==================== REENVIAR EMAIL DE ACTIVACIÓN ====================
 
-  async resendVerification(resendDto: ResendVerificationDto, lang = 'es') {
-    lang = this.normalizeLang(lang);
-    const { email } = resendDto;
+  async resendActivation(
+    email: string,
+    lang?: string,
+  ): Promise<{ message: string }> {
+    const language = this.normalizeLang(lang);
 
-    const user = await this.getUserByEmail(email);
-    if (user.emailVerified) throw new BadRequestException('verification.alreadyVerified');
-
-    const code = this.cryptoService.generateNumericCode(6);
-    await this.redis.setex(`verification:${email.toLowerCase()}`, 900, code);
-
-    const subject = this.i18n.t('user.email.verification.subject', { lang }) as string;
-
-    await this.mailService.queueEmail({
-      to: email,
-      subject,
-      template: `verification-code/verification-code.${lang}.hbs`,
-      context: {
-        name: user.firstName,
-        code,
-        actionUrl: `${this.configService.get('frontendUrl')}/login`,
-        expiresIn: 15,
-        ...this.getEmailBaseContext(),
-      },
+    const user = await this.userRepository.findOne({
+      where: { email: email.toLowerCase() },
     });
 
-    return { message: 'verification.resent' };
+    if (!user) {
+      // No revelar si el usuario existe o no (seguridad)
+      this.logger.warn(`Intento de reenvío para email no registrado: ${email}`);
+      return {
+        message: this.i18n.t('activation.resendGeneric', { lang: language }) as string,
+      };
+    }
+
+    // Si ya está activado, no hacer nada
+    if (user.emailVerified && user.isActive()) {
+      return {
+        message: this.i18n.t('activation.resendGeneric', { lang: language }) as string,
+      };
+    }
+
+    // Rate limiting: máximo 1 reenvío cada 2 minutos
+    const rateLimitKey = `resend-activation:${email.toLowerCase()}`;
+    const rateLimitExists = await this.redis.exists(rateLimitKey);
+
+    if (rateLimitExists) {
+      throw new BadRequestException(
+        this.i18n.t('activation.rateLimitExceeded', { 
+          lang: language,
+          args: { minutes: 2 } 
+        }) as string,
+      );
+    }
+
+    // Generar nuevo token
+    const activationToken = this.cryptoService.generateToken(32);
+    
+    // Guardar en Redis
+    const redisKey = `activation:${activationToken}`;
+    await this.redis.setex(redisKey, 86400, user.id.toString());
+
+    // Establecer rate limit
+    await this.redis.setex(rateLimitKey, 120, '1'); // 2 minutos
+
+    // ✅ REENVIAR EMAIL - Se encola automáticamente
+    await this.mailService.sendTemplatedEmail(
+      user.email,
+      'ACCOUNT_ACTIVATION',
+      {
+        firstName: user.firstName,
+        token: activationToken,
+        expiresIn: 24,
+      },
+      language,
+      {
+        priority: 10,
+        attempts: 5,
+      },
+    );
+
+    this.logger.log(`Email de activación reenviado: ${email} (idioma: ${language})`);
+
+    return {
+      message: this.i18n.t('activation.resendGeneric', { lang: language }) as string,
+    };
   }
 
-  // ==================== OLVIDÉ MI CONTRASEÑA ====================
+  // ==================== VALIDAR TOKEN SIN ACTIVAR ====================
 
-  async forgotPassword(forgotDto: ForgotPasswordDto, lang = 'es') {
-    lang = this.normalizeLang(lang);
+  async validateActivationToken(
+    token: string,
+    lang?: string,
+  ): Promise<{ valid: boolean; message: string; email?: string }> {
+    const language = this.normalizeLang(lang);
+
+    if (!token || token.length !== 64) {
+      return { 
+        valid: false, 
+        message: this.i18n.t('activation.invalidFormat', { lang: language }) as string,
+      };
+    }
+
+    const redisKey = `activation:${token}`;
+    const userId = await this.redis.get(redisKey);
+
+    if (!userId) {
+      return { 
+        valid: false, 
+        message: this.i18n.t('activation.tokenExpired', { lang: language }) as string,
+      };
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'email', 'emailVerified', 'status'],
+    });
+
+    if (!user) {
+      await this.redis.del(redisKey);
+      return { 
+        valid: false, 
+        message: this.i18n.t('user.notFound', { lang: language }) as string,
+      };
+    }
+
+    if (user.emailVerified && user.isActive()) {
+      await this.redis.del(redisKey);
+      return { 
+        valid: false, 
+        message: this.i18n.t('activation.alreadyActivated', { lang: language }) as string,
+      };
+    }
+
+    return { 
+      valid: true, 
+      message: this.i18n.t('activation.tokenValid', { lang: language }) as string,
+      email: user.email,
+    };
+  }
+
+  // ==================== RECUPERACIÓN DE CONTRASEÑA ====================
+
+  async forgotPassword(
+    forgotDto: ForgotPasswordDto,
+    lang?: string,
+  ): Promise<{ message: string }> {
     const { email } = forgotDto;
+    const language = this.normalizeLang(lang);
 
-    const user = await this.getUserByEmail(email);
-
-    const code = this.cryptoService.generateNumericCode(6);
-    await this.redis.setex(`reset:${email.toLowerCase()}`, 900, code);
-
-    const subject = this.i18n.t('email.passwordReset.subject', { lang }) as string;
-
-    await this.mailService.queueEmail({
-      to: email,
-      subject,
-      template: `reset-password/reset-password.${lang}.hbs`,
-      context: {
-        name: user.firstName,
-        code,
-        actionUrl: `${this.configService.get('frontendUrl')}/reset-password`,
-        expiresIn: 15,
-        ...this.getEmailBaseContext(),
-      },
+    const user = await this.userRepository.findOne({
+      where: { email: email.toLowerCase() },
     });
 
-    return { message: 'password.resetCodeSent' };
+    if (!user) {
+      this.logger.warn(`Recuperación para email no registrado: ${email}`);
+      return {
+        message: this.i18n.t('password.resetLinkSent', { lang: language }) as string,
+      };
+    }
+
+    if (!user.emailVerified) {
+      throw new BadRequestException(
+        this.i18n.t('activation.emailNotVerified', { lang: language }) as string,
+      );
+    }
+
+    // Rate limiting
+    const rateLimitKey = `forgot:${email.toLowerCase()}`;
+    const rateLimitExists = await this.redis.exists(rateLimitKey);
+
+    if (rateLimitExists) {
+      throw new BadRequestException(
+        this.i18n.t('password.rateLimitExceeded', {
+          lang: language,
+          args: { minutes: 5 },
+        }) as string,
+      );
+    }
+
+    // Generar token
+    const resetToken = this.cryptoService.generateToken(32);
+    const hashedToken = this.cryptoService.hashData(resetToken);
+
+    const redisKey = `reset:${hashedToken}`;
+    await this.redis.setex(redisKey, 3600, user.id.toString()); // 1 hora
+    await this.redis.setex(rateLimitKey, 300, '1'); // 5 minutos
+
+    // ✅ ENVIAR EMAIL - Se encola automáticamente
+    await this.mailService.sendTemplatedEmail(
+      user.email,
+      'PASSWORD_RESET',
+      {
+        firstName: user.firstName,
+        token: resetToken,
+        expiresIn: 60,
+      },
+      language,
+      {
+        priority: 8,
+        attempts: 5,
+      },
+    );
+
+    this.logger.log(`Link de recuperación enviado: ${email} (idioma: ${language})`);
+
+    return {
+      message: this.i18n.t('password.resetLinkSent', { lang: language }) as string,
+    };
   }
 
-  // ==================== RESTABLECER CONTRASEÑA ====================
+  // ==================== RESETEAR CONTRASEÑA ====================
 
-  async resetPassword(resetDto: ResetPasswordDto) {
-    const { email, code, newPassword } = resetDto;
+  async resetPassword(
+    resetDto: ResetPasswordDto,
+    lang?: string,
+  ): Promise<{ message: string }> {
+    const { token, newPassword } = resetDto;
+    const language = this.normalizeLang(lang);
 
-    const stored = await this.redis.get(`reset:${email.toLowerCase()}`);
-    if (!stored || stored !== code) throw new UnauthorizedException('password.invalidCode');
+    const hashedToken = this.cryptoService.hashData(token);
+    const redisKey = `reset:${hashedToken}`;
 
-    const user = await this.getUserByEmail(email);
-    user.password = await this.cryptoService.hashPassword(newPassword);
+    const userId = await this.redis.get(redisKey);
+
+    if (!userId) {
+      throw new BadRequestException(
+        this.i18n.t('password.tokenInvalid', { lang: language }) as string,
+      );
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        this.i18n.t('user.notFound', { lang: language }) as string,
+      );
+    }
+
+    const hashedPassword = await this.cryptoService.hashPassword(newPassword);
+
+    user.password = hashedPassword;
     await this.userRepository.save(user);
 
-    await this.redis.del(`reset:${email.toLowerCase()}`);
-    return { message: 'password.changed' };
+    await this.redis.del(redisKey);
+
+    // ✅ ENVIAR NOTIFICACIÓN - Se encola automáticamente
+    await this.mailService.sendTemplatedEmail(
+      user.email,
+      'PASSWORD_CHANGED',
+      {
+        firstName: user.firstName,
+      },
+      language,
+    );
+
+    this.logger.log(`Contraseña reseteada: ${user.email} (idioma: ${language})`);
+
+    return {
+      message: this.i18n.t('password.changed', { lang: language }) as string,
+    };
   }
 
-  // ==================== CAMBIAR CONTRASEÑA CON SESIÓN ====================
+  // ==================== CAMBIAR CONTRASEÑA ====================
 
-  async changePassword(userId: number, changeDto: ChangePasswordDto) {
+  async changePassword(
+    userId: string,
+    changeDto: ChangePasswordDto,
+    lang?: string,
+  ): Promise<{ message: string }> {
     const { currentPassword, newPassword } = changeDto;
+    const language = this.normalizeLang(lang);
 
-    const user = await this.userRepository.findOne({ where: { id: userId.toString() } });
-    if (!user) throw new NotFoundException('user.notFound');
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'email', 'password', 'firstName'],
+    });
 
-    const valid = await this.cryptoService.comparePassword(currentPassword, user.password);
-    if (!valid) throw new UnauthorizedException('auth.invalidPassword');
+    if (!user) {
+      throw new NotFoundException(
+        this.i18n.t('user.notFound', { lang: language }) as string,
+      );
+    }
 
-    user.password = await this.cryptoService.hashPassword(newPassword);
+    const isPasswordValid = await this.cryptoService.verifyPassword(
+      currentPassword,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(
+        this.i18n.t('password.currentIncorrect', { lang: language }) as string,
+      );
+    }
+
+    const isSamePassword = await this.cryptoService.verifyPassword(
+      newPassword,
+      user.password,
+    );
+
+    if (isSamePassword) {
+      throw new BadRequestException(
+        this.i18n.t('password.mustBeDifferent', { lang: language }) as string,
+      );
+    }
+
+    const hashedPassword = await this.cryptoService.hashPassword(newPassword);
+
+    user.password = hashedPassword;
     await this.userRepository.save(user);
 
-    return { message: 'password.changed' };
+    // ✅ ENVIAR NOTIFICACIÓN - Se encola automáticamente
+    await this.mailService.sendTemplatedEmail(
+      user.email,
+      'PASSWORD_CHANGED',
+      {
+        firstName: user.firstName,
+      },
+      language,
+    );
+
+    this.logger.log(`Contraseña cambiada: ${user.email} (idioma: ${language})`);
+
+    return {
+      message: this.i18n.t('password.changed', { lang: language }) as string,
+    };
   }
 
-  async validateResetToken(token: string) {
-    const email = await this.redis.get(`reset:${token}`);
-    if (!email) throw new BadRequestException('password.invalidToken');
-    return { message: 'password.tokenValid' };
+  // ==================== VALIDAR TOKEN DE RESET ====================
+
+  async validateResetToken(
+    token: string,
+    lang?: string,
+  ): Promise<{ valid: boolean; message: string }> {
+    const language = this.normalizeLang(lang);
+
+    const hashedToken = this.cryptoService.hashData(token);
+    const redisKey = `reset:${hashedToken}`;
+
+    const userId = await this.redis.get(redisKey);
+
+    if (!userId) {
+      return { 
+        valid: false, 
+        message: this.i18n.t('password.tokenInvalid', { lang: language }) as string,
+      };
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      await this.redis.del(redisKey);
+      return { 
+        valid: false, 
+        message: this.i18n.t('password.tokenInvalid', { lang: language }) as string,
+      };
+    }
+
+    return { 
+      valid: true, 
+      message: this.i18n.t('password.tokenValid', { lang: language }) as string,
+    };
   }
 }

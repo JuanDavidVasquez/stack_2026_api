@@ -70,4 +70,8 @@ export default (): Config => ({
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
   },
   
+  urls:{
+    frontend: process.env.FRONTEND_URL || 'http://localhost:3000',
+    api: process.env.API_URL || 'http://localhost:3000/api',
+  }
 });

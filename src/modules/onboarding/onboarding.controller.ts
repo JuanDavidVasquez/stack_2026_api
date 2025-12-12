@@ -31,7 +31,7 @@ export class OnboardingController {
 
   /**
    * POST /onboarding/register
-   * Registra un nuevo usuario y envía código de verificación
+   * Registra un nuevo usuario y envía email con link de activación
    */
   @Public()
   @Post('register')
@@ -43,36 +43,50 @@ export class OnboardingController {
     return this.onboardingService.register(registerDto, lang);
   }
 
-  // ==================== VERIFICACIÓN DE EMAIL ====================
+  // ==================== ACTIVACIÓN DE CUENTA ====================
 
   /**
-   * POST /onboarding/verify-email
-   * Verifica el email del usuario con el código enviado
+   * POST /onboarding/activate/:token
+   * Activa la cuenta del usuario con el token enviado por email
    */
   @Public()
-  @Post('verify-email')
+  @Post('activate/:token')
   @HttpCode(HttpStatus.OK)
-  async verifyEmail(
-    @Body() verifyEmailDto: VerifyEmailDto,
+  async activateAccount(
+    @Param('token') token: string,
     @Lang() lang: string,
   ) {
-    return this.onboardingService.verifyEmail(verifyEmailDto, lang);
+    return this.onboardingService.activateAccount(token, lang);
   }
 
-  // ==================== REENVIAR CÓDIGO ====================
-
   /**
-   * POST /onboarding/resend-verification
-   * Reenvía el código de verificación
+   * GET /onboarding/validate-activation/:token
+   * Valida si un token de activación es válido (sin activar)
    */
   @Public()
-  @Post('resend-verification')
+  @Get('validate-activation/:token')
   @HttpCode(HttpStatus.OK)
-  async resendVerification(
-    @Body() resendDto: ResendVerificationDto,
+  async validateActivationToken(
+    @Param('token') token: string,
     @Lang() lang: string,
   ) {
-    return this.onboardingService.resendVerification(resendDto, lang);
+    return this.onboardingService.validateActivationToken(token, lang);
+  }
+
+  // ==================== REENVIAR EMAIL DE ACTIVACIÓN ====================
+
+  /**
+   * POST /onboarding/resend-activation
+   * Reenvía el email de activación
+   */
+  @Public()
+  @Post('resend-activation')
+  @HttpCode(HttpStatus.OK)
+  async resendActivation(
+    @Body() body: { email: string },
+    @Lang() lang: string,
+  ) {
+    return this.onboardingService.resendActivation(body.email, lang);
   }
 
   // ==================== RECUPERACIÓN DE CONTRASEÑA ====================
@@ -102,18 +116,21 @@ export class OnboardingController {
     @Body() resetDto: ResetPasswordDto,
     @Lang() lang: string,
   ) {
-    return this.onboardingService.resetPassword(resetDto);
+    return this.onboardingService.resetPassword(resetDto, lang);
   }
 
   /**
-   * GET /onboarding/validate-token/:token
+   * GET /onboarding/validate-reset-token/:token
    * Valida si un token de recuperación es válido
    */
   @Public()
-  @Get('validate-token/:token')
+  @Get('validate-reset-token/:token')
   @HttpCode(HttpStatus.OK)
-  async validateToken(@Param('token') token: string) {
-    return this.onboardingService.validateResetToken(token);
+  async validateResetToken(
+    @Param('token') token: string,
+    @Lang() lang: string,
+  ) {
+    return this.onboardingService.validateResetToken(token, lang);
   }
 
   // ==================== CAMBIO DE CONTRASEÑA (AUTENTICADO) ====================
@@ -132,6 +149,6 @@ export class OnboardingController {
     @Lang() lang: string,
   ) {
     const userId = req.user?.id || req.user?.sub;
-    return this.onboardingService.changePassword(userId, changeDto);
+    return this.onboardingService.changePassword(userId, changeDto, lang);
   }
 }

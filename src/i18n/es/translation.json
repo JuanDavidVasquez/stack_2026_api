@@ -1,12 +1,10 @@
 {
-  "appName": "OneLesson",
-  "companyName": "OneLesson",
   "common": {
     "welcome": "Bienvenido",
     "hello": "Hola",
     "goodbye": "Adiós",
     "success": "Operación exitosa",
-    "error": "Ocurrió un error",
+    "error": "Ha ocurrido un error",
     "notFound": "Recurso no encontrado",
     "unauthorized": "Acceso no autorizado",
     "forbidden": "Prohibido",
@@ -17,13 +15,18 @@
     "login": {
       "success": "Inicio de sesión exitoso",
       "failed": "Credenciales inválidas",
-      "emailRequired": "El correo electrónico es requerido",
-      "passwordRequired": "La contraseña es requerida"
+      "emailRequired": "El email es requerido",
+      "passwordRequired": "La contraseña es requerida",
+      "accountNotActivated": "Tu cuenta aún no ha sido activada. Por favor revisa tu email y haz clic en el enlace de activación.",
+      "accountPending": "Tu cuenta está pendiente de activación",
+      "accountSuspended": "Tu cuenta ha sido suspendida",
+      "accountInactive": "Tu cuenta está inactiva",
+      "invalidCredentials": "Email o contraseña inválidos"
     },
     "register": {
       "success": "Registro exitoso",
-      "emailExists": "El correo electrónico ya existe",
-      "weakPassword": "La contraseña es muy débil"
+      "emailExists": "El email ya existe",
+      "weakPassword": "La contraseña es demasiado débil"
     },
     "logout": {
       "success": "Cierre de sesión exitoso"
@@ -34,22 +37,34 @@
       "missing": "Token faltante"
     }
   },
+  "activation": {
+    "invalidToken": "Token de activación inválido",
+    "tokenExpired": "El token de activación ha expirado o es inválido",
+    "alreadyActivated": "La cuenta ya está activada",
+    "invalidFormat": "Formato de token inválido",
+    "tokenValid": "El token es válido",
+    "success": "Cuenta activada exitosamente. Ya puedes iniciar sesión.",
+    "resendGeneric": "Si el email existe y no está activado, recibirás un nuevo enlace.",
+    "rateLimitExceeded": "Debes esperar {{minutes}} minutos antes de solicitar otro email de activación"
+  },
   "user": {
     "created": "Usuario creado exitosamente",
     "updated": "Usuario actualizado exitosamente",
     "deleted": "Usuario eliminado exitosamente",
     "notFound": "Usuario no encontrado",
     "list": "Usuarios obtenidos exitosamente",
-    "restored": "Usuario restaurado exitosamente",
-    "emailExists": "El correo electrónico ya existe",
     "profile": {
       "updated": "Perfil actualizado exitosamente",
-      "imageUploaded": "Imagen de perfil cargada exitosamente",
+      "imageUploaded": "Imagen de perfil subida exitosamente",
       "retrieved": "Perfil obtenido exitosamente"
-    }
+    },
+    "restored": "Usuario restaurado exitosamente",
+    "emailExists": "El email ya existe",
+    "usernameExists": "El nombre de usuario ya existe",
+    "registered": "Usuario registrado. Por favor revisa tu email para activar tu cuenta."
   },
   "validation": {
-    "isEmail": "{field} debe ser un correo electrónico válido",
+    "isEmail": "{field} debe ser un email válido",
     "isString": "{field} debe ser una cadena de texto",
     "isNumber": "{field} debe ser un número",
     "isBoolean": "{field} debe ser un valor booleano",
@@ -63,18 +78,18 @@
     "matches": "El formato de {field} es inválido",
     "isUUID": "{field} debe ser un UUID válido",
     "isUrl": "{field} debe ser una URL válida",
-    "isPhoneNumber": "{field} debe ser un número telefónico válido",
+    "isPhoneNumber": "{field} debe ser un número de teléfono válido",
     "passwordStrength": "La contraseña debe contener mayúsculas, minúsculas, números y caracteres especiales"
   },
   "database": {
     "connectionError": "Error de conexión a la base de datos",
-    "queryError": "Error en la consulta a la base de datos",
+    "queryError": "Error en la consulta de base de datos",
     "duplicateEntry": "Entrada duplicada detectada",
     "foreignKeyConstraint": "Violación de restricción de clave foránea"
   },
   "file": {
-    "uploadSuccess": "Archivo cargado exitosamente",
-    "uploadFailed": "Falló la carga del archivo",
+    "uploadSuccess": "Archivo subido exitosamente",
+    "uploadFailed": "Fallo al subir el archivo",
     "invalidFormat": "Formato de archivo inválido",
     "tooLarge": "El tamaño del archivo excede el límite",
     "notFound": "Archivo no encontrado"
@@ -86,70 +101,76 @@
     "showing": "Mostrando {from} a {to} de {total} entradas"
   },
   "email": {
-    "sent": "Correo enviado exitosamente",
-    "failed": "Falló el envío del correo",
-    "invalidAddress": "Dirección de correo electrónico inválida",
+    "sent": "Email enviado exitosamente",
+    "failed": "Fallo al enviar el email",
+    "invalidAddress": "Dirección de email inválida",
+    "verification": {
+      "subject": "Verifica tu cuenta - {{appName}}",
+      "title": "Verifica Tu Cuenta",
+      "greeting": "¡Hola {{firstName}}!",
+      "message": "Gracias por registrarte. Usa el siguiente código para verificar tu cuenta:",
+      "codeLabel": "Tu código de verificación:",
+      "expiresIn": "Este código expirará en {{expiresIn}} minutos",
+      "securityNote": "Si no solicitaste este código, por favor ignora este email.",
+      "closing": "Saludos, El equipo de {{appName}}"
+    },
+    "activation": {
+      "subject": "Activa tu cuenta - {{appName}}",
+      "title": "Activa Tu Cuenta",
+      "greeting": "¡Hola {{firstName}}!",
+      "message": "Gracias por registrarte. Haz clic en el botón de abajo para activar tu cuenta:",
+      "button": "Activar Mi Cuenta",
+      "expiresIn": "Este enlace expirará en {{expiresIn}} horas",
+      "alternativeText": "Si el botón no funciona, copia y pega este enlace en tu navegador:",
+      "securityNote": "Si no creaste esta cuenta, puedes ignorar este email de forma segura."
+    },
+    "welcome": {
+      "subject": "¡Bienvenido a {{appName}}, {{firstName}}!",
+      "title": "¡Bienvenido!",
+      "greeting": "¡Bienvenido, {{firstName}}!",
+      "message": "Tu cuenta ha sido verificada exitosamente y ahora está activa.",
+      "accountReady": "¡Tu cuenta está lista para usar!",
+      "loginButton": "Iniciar Sesión",
+      "nextSteps": "Próximos pasos:",
+      "step1": "Completa tu perfil",
+      "step2": "Explora las funcionalidades",
+      "step3": "Configura tus preferencias",
+      "closing": "Si tienes alguna pregunta, no dudes en contactarnos."
+    },
+    "passwordReset": {
+      "subject": "Recuperación de Contraseña - {{appName}}",
+      "title": "Recuperación de Contraseña",
+      "greeting": "Hola {{firstName}},",
+      "message": "Recibimos una solicitud para restablecer la contraseña de tu cuenta.",
+      "instruction": "Haz clic en el botón de abajo para crear una nueva contraseña:",
+      "resetButton": "Restablecer Contraseña",
+      "expiresIn": "Este enlace expirará en {{expiresIn}} minutos",
+      "alternativeText": "Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:",
+      "securityNote": "Si no solicitaste este restablecimiento, por favor ignora este email. Tu cuenta permanecerá segura.",
+      "closing": "Saludos, El equipo de {{appName}}"
+    },
+    "passwordChanged": {
+      "subject": "Tu contraseña ha sido actualizada - {{appName}}",
+      "title": "Contraseña Actualizada",
+      "greeting": "Hola {{firstName}},",
+      "message": "Confirmamos que la contraseña de tu cuenta ha sido cambiada exitosamente.",
+      "successMessage": "Tu contraseña ha sido actualizada",
+      "loginMessage": "Ahora puedes iniciar sesión con tu nueva contraseña.",
+      "securityWarning": "¿No fuiste tú?",
+      "securityMessage": "Si no realizaste este cambio, tu cuenta puede estar comprometida. Por favor contacta a nuestro equipo de soporte inmediatamente en:",
+      "securityTipsTitle": "Consejos de seguridad:",
+      "tip1": "Usa contraseñas únicas para cada servicio",
+      "tip2": "Habilita la autenticación de dos factores",
+      "tip3": "Nunca compartas tu contraseña con nadie",
+      "tip4": "Actualiza tu contraseña regularmente",
+      "closing": "Saludos, El equipo de {{appName}}"
+    },
+    "appName": "OneLesson",
+    "companyName": "OneLesson",
     "footer": {
       "copyright": "© {{year}} {{companyName}}. Todos los derechos reservados.",
       "privacy": "Política de Privacidad",
       "terms": "Términos y Condiciones"
-    },
-    "verification":{
-      "subject": "Verifica tu dirección de correo electrónico",
-      "verificationBody": "Hola {{name}},\n\nPor favor verifica tu dirección de correo electrónico haciendo clic en el siguiente enlace:\n\n{{verificationLink}}\n\n¡Gracias por unirte a nosotros!\n\nSaludos,\nEl Equipo"
-    },
-    "translation": {
-      "verification": {
-        "subject": "Verifica tu cuenta - {{appName}}",
-        "title": "Verifica tu cuenta",
-        "greeting": "¡Hola {{firstName}}!",
-        "message": "Gracias por registrarte. Usa el siguiente código para verificar tu cuenta:",
-        "codeLabel": "Tu código de verificación:",
-        "expiresIn": "Este código expirará en {{expiresIn}} minutos",
-        "securityNote": "Si no solicitaste este código, por favor ignora este email.",
-        "closing": "Saludos, El equipo de {{appName}}"
-      },
-      "welcome": {
-        "subject": "¡Bienvenido a {{appName}}, {{firstName}}!",
-        "title": "¡Bienvenido!",
-        "greeting": "¡Bienvenido, {{firstName}}!",
-        "message": "Tu cuenta ha sido verificada exitosamente y ya está activa.",
-        "accountReady": "¡Tu cuenta está lista para usar!",
-        "loginButton": "Iniciar Sesión",
-        "nextSteps": "Próximos pasos:",
-        "step1": "Completa tu perfil",
-        "step2": "Explora las funcionalidades",
-        "step3": "Configura tus preferencias",
-        "closing": "Si tienes alguna pregunta, no dudes en contactarnos."
-      },
-      "passwordReset": {
-        "subject": "Recuperación de Contraseña - {{appName}}",
-        "title": "Recuperación de Contraseña",
-        "greeting": "Hola {{firstName}},",
-        "message": "Recibimos una solicitud para restablecer la contraseña de tu cuenta.",
-        "instruction": "Haz clic en el siguiente botón para crear una nueva contraseña:",
-        "resetButton": "Restablecer Contraseña",
-        "expiresIn": "Este enlace expirará en {{expiresIn}} minutos",
-        "alternativeText": "Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:",
-        "securityNote": "Si no solicitaste restablecer tu contraseña, por favor ignora este email. Tu cuenta permanecerá segura.",
-        "closing": "Saludos, El equipo de {{appName}}"
-      },
-      "passwordChanged": {
-        "subject": "Tu contraseña ha sido actualizada - {{appName}}",
-        "title": "Contraseña Actualizada",
-        "greeting": "Hola {{firstName}},",
-        "message": "Te confirmamos que la contraseña de tu cuenta ha sido cambiada exitosamente.",
-        "successMessage": "Tu contraseña ha sido actualizada",
-        "loginMessage": "Ahora puedes iniciar sesión con tu nueva contraseña.",
-        "securityWarning": "¿No fuiste tú?",
-        "securityMessage": "Si no realizaste este cambio, tu cuenta podría estar comprometida. Por favor contacta a nuestro equipo de soporte inmediatamente en:",
-        "securityTipsTitle": "Consejos de seguridad:",
-        "tip1": "Usa contraseñas únicas para cada servicio",
-        "tip2": "Habilita la autenticación de dos factores",
-        "tip3": "Nunca compartas tu contraseña con nadie",
-        "tip4": "Actualiza tu contraseña regularmente",
-        "closing": "Saludos, El equipo de {{appName}}"
-      }
     }
   },
   "errors": {

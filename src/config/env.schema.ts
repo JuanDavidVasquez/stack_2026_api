@@ -228,6 +228,16 @@ export const envSchema = z
     SMTP_PASSWORD: z.string().optional(),
 
     SMTP_FROM: z.string().email().optional(),
+
+    FRONTEND_URL: z
+      .string()
+      .url('FRONTEND_URL debe ser una URL válida')
+      .default('http://localhost:3000'),
+
+    API_URL: z
+      .string()
+      .url('API_URL debe ser una URL válida')
+      .default('http://localhost:3000/api'),
   })
   // ==================== VALIDACIONES CROSS-FIELD ====================
   .refine(

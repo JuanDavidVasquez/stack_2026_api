@@ -16,7 +16,12 @@
       "success": "Login successful",
       "failed": "Invalid credentials",
       "emailRequired": "Email is required",
-      "passwordRequired": "Password is required"
+      "passwordRequired": "Password is required",
+      "accountNotActivated": "Your account has not been activated yet. Please check your email and click the activation link.",
+      "accountPending": "Your account is pending activation",
+      "accountSuspended": "Your account has been suspended",
+      "accountInactive": "Your account is inactive",
+      "invalidCredentials": "Invalid email or password"
     },
     "register": {
       "success": "Registration successful",
@@ -32,6 +37,16 @@
       "missing": "Missing token"
     }
   },
+  "activation": {
+    "invalidToken": "Invalid activation token",
+    "tokenExpired": "Activation token has expired or is invalid",
+    "alreadyActivated": "Account is already activated",
+    "invalidFormat": "Invalid token format",
+    "tokenValid": "Token is valid",
+    "success": "Account activated successfully. You can now log in.",
+    "resendGeneric": "If the email exists and is not activated, you will receive a new link.",
+    "rateLimitExceeded": "You must wait {{minutes}} minutes before requesting another activation email"
+  },
   "user": {
     "created": "User successfully created",
     "updated": "User successfully updated",
@@ -44,7 +59,9 @@
       "retrieved": "Profile retrieved successfully"
     },
     "restored": "User successfully restored",
-    "emailExists": "Email already exists"
+    "emailExists": "Email already exists",
+    "usernameExists": "Username already exists",
+    "registered": "User registered. Please check your email to activate your account."
   },
   "validation": {
     "isEmail": "{field} must be a valid email",
@@ -96,6 +113,16 @@
       "expiresIn": "This code will expire in {{expiresIn}} minutes",
       "securityNote": "If you did not request this code, please ignore this email.",
       "closing": "Regards, The {{appName}} team"
+    },
+    "activation": {
+      "subject": "Activate Your Account - {{appName}}",
+      "title": "Activate Your Account",
+      "greeting": "Hello {{firstName}}!",
+      "message": "Thank you for signing up. Click the button below to activate your account:",
+      "button": "Activate My Account",
+      "expiresIn": "This link will expire in {{expiresIn}} hours",
+      "alternativeText": "If the button doesn't work, copy and paste this link into your browser:",
+      "securityNote": "If you didn't create this account, you can safely ignore this email."
     },
     "welcome": {
       "subject": "Welcome to {{appName}}, {{firstName}}!",

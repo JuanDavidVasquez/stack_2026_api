@@ -1,25 +1,52 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Worker } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
-import { MailService } from './mail.service';
+import { MailerService } from '@nestjs-modules/mailer';
+import { EmailJobData } from './mail.queue';
 
 @Injectable()
 export class MailProcessor {
   private readonly logger = new Logger(MailProcessor.name);
   private readonly worker: Worker;
+  private readonly isSmtpConfigured: boolean;
 
   constructor(
-    private readonly mailService: MailService,
+    private readonly mailerService: MailerService,
     private readonly config: ConfigService,
   ) {
+    this.isSmtpConfigured = !!this.config.get<string>('smtp.host');
+
     this.worker = new Worker(
       'email_queue',
-      async job => {
+      async (job) => {
         this.logger.log(`▶ Procesando email a: ${job.data.to}`);
 
-        await this.mailService.sendEmail(job.data);
+        const { to, subject, template, context, cc, bcc, attachments, from } = job.data as EmailJobData;
 
-        this.logger.log(`✔ Email enviado → ${job.data.to}`);
+        if (!this.isSmtpConfigured) {
+          this.simulateEmail(job.data);
+          return { success: true, simulated: true };
+        }
+
+        const result = await this.mailerService.sendMail({
+          to,
+          subject,
+          template,
+          context,
+          cc,
+          bcc,
+          attachments,
+          from: from || this.config.get<string>('smtp.from'),
+        });
+
+        this.logger.log(`✔ Email enviado → ${to}`);
+
+        return {
+          success: true,
+          messageId: result.messageId,
+          to,
+          timestamp: new Date().toISOString(),
+        };
       },
       {
         connection: {
@@ -28,12 +55,12 @@ export class MailProcessor {
           password: this.config.get('redis.password'),
           db: this.config.get('redis.db'),
         },
-        concurrency: 1, // UNO a la vez = orden garantizado
+        concurrency: 1,
         limiter: {
-          max: 1,        // SOLO 1 job
-          duration: 1000 // cada 1 segundo
+          max: 1,
+          duration: 1000,
         },
-      }
+      },
     );
 
     this.worker.on('failed', (job, err) => {
@@ -41,8 +68,15 @@ export class MailProcessor {
       this.logger.error(`❌ Job ${jobId} falló → ${err.message}`);
     });
 
-    this.worker.on('completed', job => {
+    this.worker.on('completed', (job) => {
       this.logger.log(`🏁 Job completado → ${job.id}`);
     });
+  }
+
+  private simulateEmail(data: EmailJobData): void {
+    this.logger.log('📧 [SIMULATED EMAIL]');
+    this.logger.log(`   To: ${data.to}`);
+    this.logger.log(`   Subject: ${data.subject}`);
+    this.logger.log(`   Template: ${data.template}`);
   }
 }

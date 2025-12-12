@@ -13,24 +13,39 @@
   },
   "auth": {
     "login": {
-      "success": "Login realizado com sucesso",
+      "success": "Login bem-sucedido",
       "failed": "Credenciais inválidas",
       "emailRequired": "O e-mail é obrigatório",
-      "passwordRequired": "A senha é obrigatória"
+      "passwordRequired": "A senha é obrigatória",
+      "accountNotActivated": "Sua conta ainda não foi ativada. Por favor, verifique seu e-mail e clique no link de ativação.",
+      "accountPending": "Sua conta está pendente de ativação",
+      "accountSuspended": "Sua conta foi suspensa",
+      "accountInactive": "Sua conta está inativa",
+      "invalidCredentials": "E-mail ou senha inválidos"
     },
     "register": {
-      "success": "Registro realizado com sucesso",
+      "success": "Registro bem-sucedido",
       "emailExists": "O e-mail já existe",
       "weakPassword": "A senha é muito fraca"
     },
     "logout": {
-      "success": "Logout realizado com sucesso"
+      "success": "Logout bem-sucedido"
     },
     "token": {
       "invalid": "Token inválido",
       "expired": "Token expirado",
       "missing": "Token ausente"
     }
+  },
+  "activation": {
+    "invalidToken": "Token de ativação inválido",
+    "tokenExpired": "O token de ativação expirou ou é inválido",
+    "alreadyActivated": "A conta já está ativada",
+    "invalidFormat": "Formato de token inválido",
+    "tokenValid": "O token é válido",
+    "success": "Conta ativada com sucesso. Você já pode fazer login.",
+    "resendGeneric": "Se o e-mail existir e não estiver ativado, você receberá um novo link.",
+    "rateLimitExceeded": "Você deve esperar {{minutes}} minutos antes de solicitar outro e-mail de ativação"
   },
   "user": {
     "created": "Usuário criado com sucesso",
@@ -40,11 +55,13 @@
     "list": "Usuários obtidos com sucesso",
     "profile": {
       "updated": "Perfil atualizado com sucesso",
-      "imageUploaded": "Imagem de perfil enviada com sucesso",
+      "imageUploaded": "Imagem de perfil carregada com sucesso",
       "retrieved": "Perfil obtido com sucesso"
     },
     "restored": "Usuário restaurado com sucesso",
-    "emailExists": "O e-mail já existe"
+    "emailExists": "O e-mail já existe",
+    "usernameExists": "O nome de usuário já existe",
+    "registered": "Usuário registrado. Por favor, verifique seu e-mail para ativar sua conta."
   },
   "validation": {
     "isEmail": "{field} deve ser um e-mail válido",
@@ -53,8 +70,8 @@
     "isBoolean": "{field} deve ser um valor booleano",
     "isDate": "{field} deve ser uma data válida",
     "minLength": "{field} deve ter pelo menos {min} caracteres",
-    "maxLength": "{field} não deve ter mais que {max} caracteres",
-    "min": "{field} deve ser no mínimo {min}",
+    "maxLength": "{field} não deve ter mais de {max} caracteres",
+    "min": "{field} deve ser pelo menos {min}",
     "max": "{field} não deve ser maior que {max}",
     "isNotEmpty": "{field} não pode estar vazio",
     "isOptional": "{field} é opcional",
@@ -62,17 +79,17 @@
     "isUUID": "{field} deve ser um UUID válido",
     "isUrl": "{field} deve ser uma URL válida",
     "isPhoneNumber": "{field} deve ser um número de telefone válido",
-    "passwordStrength": "A senha deve conter letras maiúsculas, minúsculas, números e caracteres especiais"
+    "passwordStrength": "A senha deve conter maiúsculas, minúsculas, números e caracteres especiais"
   },
   "database": {
     "connectionError": "Erro de conexão com o banco de dados",
-    "queryError": "Erro na consulta ao banco de dados",
+    "queryError": "Erro na consulta do banco de dados",
     "duplicateEntry": "Entrada duplicada detectada",
     "foreignKeyConstraint": "Violação de restrição de chave estrangeira"
   },
   "file": {
-    "uploadSuccess": "Arquivo enviado com sucesso",
-    "uploadFailed": "Falha ao enviar o arquivo",
+    "uploadSuccess": "Arquivo carregado com sucesso",
+    "uploadFailed": "Falha ao carregar o arquivo",
     "invalidFormat": "Formato de arquivo inválido",
     "tooLarge": "O tamanho do arquivo excede o limite",
     "notFound": "Arquivo não encontrado"
@@ -81,7 +98,7 @@
     "page": "Página",
     "perPage": "Por página",
     "total": "Total",
-    "showing": "Mostrando {from} a {to} de {total} registros"
+    "showing": "Mostrando {from} a {to} de {total} entradas"
   },
   "email": {
     "sent": "E-mail enviado com sucesso",
@@ -89,26 +106,36 @@
     "invalidAddress": "Endereço de e-mail inválido",
     "verification": {
       "subject": "Verifique sua conta - {{appName}}",
-      "title": "Verifique sua conta",
+      "title": "Verifique Sua Conta",
       "greeting": "Olá {{firstName}}!",
-      "message": "Obrigado por se registrar. Use o código abaixo para verificar sua conta:",
+      "message": "Obrigado por se cadastrar. Use o seguinte código para verificar sua conta:",
       "codeLabel": "Seu código de verificação:",
       "expiresIn": "Este código expirará em {{expiresIn}} minutos",
-      "securityNote": "Se você não solicitou este código, ignore este e-mail.",
-      "closing": "Atenciosamente, Equipe {{appName}}"
+      "securityNote": "Se você não solicitou este código, por favor ignore este e-mail.",
+      "closing": "Atenciosamente, A equipe {{appName}}"
+    },
+    "activation": {
+      "subject": "Ative sua conta - {{appName}}",
+      "title": "Ative Sua Conta",
+      "greeting": "Olá {{firstName}}!",
+      "message": "Obrigado por se cadastrar. Clique no botão abaixo para ativar sua conta:",
+      "button": "Ativar Minha Conta",
+      "expiresIn": "Este link expirará em {{expiresIn}} horas",
+      "alternativeText": "Se o botão não funcionar, copie e cole este link no seu navegador:",
+      "securityNote": "Se você não criou esta conta, pode ignorar este e-mail com segurança."
     },
     "welcome": {
       "subject": "Bem-vindo ao {{appName}}, {{firstName}}!",
       "title": "Bem-vindo!",
       "greeting": "Bem-vindo, {{firstName}}!",
-      "message": "Sua conta foi verificada com sucesso e já está ativa.",
+      "message": "Sua conta foi verificada com sucesso e agora está ativa.",
       "accountReady": "Sua conta está pronta para uso!",
-      "loginButton": "Entrar",
+      "loginButton": "Fazer Login",
       "nextSteps": "Próximos passos:",
       "step1": "Complete seu perfil",
       "step2": "Explore os recursos",
       "step3": "Configure suas preferências",
-      "closing": "Se tiver alguma dúvida, entre em contato conosco."
+      "closing": "Se tiver alguma dúvida, sinta-se à vontade para entrar em contato."
     },
     "passwordReset": {
       "subject": "Recuperação de Senha - {{appName}}",
@@ -116,11 +143,11 @@
       "greeting": "Olá {{firstName}},",
       "message": "Recebemos uma solicitação para redefinir a senha da sua conta.",
       "instruction": "Clique no botão abaixo para criar uma nova senha:",
-      "resetButton": "Redefinir senha",
+      "resetButton": "Redefinir Senha",
       "expiresIn": "Este link expirará em {{expiresIn}} minutos",
-      "alternativeText": "Se o botão não funcionar, copie e cole o link abaixo no seu navegador:",
-      "securityNote": "Se você não solicitou a redefinição, ignore este e-mail. Sua conta permanecerá segura.",
-      "closing": "Atenciosamente, Equipe {{appName}}"
+      "alternativeText": "Se o botão não funcionar, copie e cole o seguinte link no seu navegador:",
+      "securityNote": "Se você não solicitou esta redefinição, por favor ignore este e-mail. Sua conta permanecerá segura.",
+      "closing": "Atenciosamente, A equipe {{appName}}"
     },
     "passwordChanged": {
       "subject": "Sua senha foi atualizada - {{appName}}",
@@ -130,13 +157,13 @@
       "successMessage": "Sua senha foi atualizada",
       "loginMessage": "Agora você pode fazer login com sua nova senha.",
       "securityWarning": "Não foi você?",
-      "securityMessage": "Se você não fez essa alteração, sua conta pode estar comprometida. Entre em contato imediatamente com nossa equipe de suporte:",
+      "securityMessage": "Se você não fez esta alteração, sua conta pode estar comprometida. Entre em contato com nossa equipe de suporte imediatamente em:",
       "securityTipsTitle": "Dicas de segurança:",
-      "tip1": "Use senhas únicas para cada serviço",
+      "tip1": "Use senhas exclusivas para cada serviço",
       "tip2": "Ative a autenticação de dois fatores",
       "tip3": "Nunca compartilhe sua senha com ninguém",
       "tip4": "Atualize sua senha regularmente",
-      "closing": "Atenciosamente, Equipe {{appName}}"
+      "closing": "Atenciosamente, A equipe {{appName}}"
     },
     "appName": "OneLesson",
     "companyName": "OneLesson",
@@ -147,7 +174,7 @@
     }
   },
   "errors": {
-    "badRequest": "Solicitação inválida",
+    "badRequest": "Solicitação incorreta",
     "notFound": "Não encontrado",
     "unauthorized": "Não autorizado",
     "forbidden": "Proibido",
